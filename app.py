@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import io
-import plotly.express as px
 import os
 import base64
 import re
@@ -243,13 +242,11 @@ def process_excel_data(df):
     has_kanali = "Kargo Teslimat Kanalı" in df.columns
 
     def is_devir(row):
-        # 1. Kural: Teslim Durumu / Saati sütununda "Teslim Edilmedi / Bekletiliyor" geçiyorsa devirdir.
         if durum_col:
             d_val = str(row[durum_col]).strip().upper()
             if "BEKLETİLİYOR" in d_val or "EDİLMEDİ" in d_val or "BEKLETILIYOR" in d_val or "EDILMEDI" in d_val:
                 return True
         
-        # 2. Kural: Teslim Eden Personel adı, AT Zimmet Personel Adı ile farklıysa (veya boşsa) devirdir.
         z_name = row["Norm_Zimmet"]
         t_name = row["Norm_Teslim"]
         if t_name == "" or t_name != z_name:
@@ -389,32 +386,16 @@ if st.session_state.active_tab == "Ana Panel":
         
         with col_left:
             st.subheader("📊 Kurye Başarı Oranları (%)")
-            fig_bar = px.bar(
-                perf_df, 
-                x="Personel", 
-                y="Başarı Oranı", 
-                color="Başarı Oranı",
-                color_continuous_scale="RdYlGn",
-                text="Başarı Oranı"
-            )
-            fig_bar.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color="white")
-            st.plotly_chart(fig_bar, use_container_width=True)
+            chart_df = perf_df.set_index("Personel")[["Başarı Oranı"]]
+            st.bar_chart(chart_df)
             
         with col_right:
             st.subheader("📲 Teslimat Kanalları Dağılımı")
-            channel_totals = {
-                "SMS": perf_df["SMS"].sum(),
-                "İmza": perf_df["İmza"].sum(),
-                "KS-PE": perf_df["KS-PE"].sum()
-            }
-            fig_pie = px.pie(
-                names=list(channel_totals.keys()),
-                values=list(channel_totals.values()),
-                hole=0.5,
-                color_discrete_sequence=['#0D6EFD', '#F57C00', '#2E7D32']
-            )
-            fig_pie.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color="white")
-            st.plotly_chart(fig_pie, use_container_width=True)
+            channel_df = pd.DataFrame({
+                "Kanal": ["SMS", "İmza", "KS-PE"],
+                "Adet": [perf_df["SMS"].sum(), perf_df["İmza"].sum(), perf_df["KS-PE"].sum()]
+            }).set_index("Kanal")
+            st.bar_chart(channel_df)
             
         st.subheader("📋 Genel Performans Tablosu")
         st.dataframe(perf_df, use_container_width=True)
