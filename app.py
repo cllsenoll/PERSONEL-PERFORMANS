@@ -214,7 +214,7 @@ def smart_read_file(uploaded_file):
     raise Exception("Dosya yapısı çözümlenemedi. Lütfen dosyanın bozuk olmadığını kontrol edin.")
 
 # ==========================================
-# AT ZİMMET İZLEME VERİ İŞLEME MOTORU (YENİ KURALLAR)
+# AT ZİMMET İZLEME VERİ İŞLEME MOTORU (DÜZELTİLMİŞ KURALLAR)
 # ==========================================
 def process_excel_data(df):
     df.columns = df.columns.astype(str).str.strip()
@@ -232,15 +232,31 @@ def process_excel_data(df):
     df["Norm_Zimmet"] = df["AT Zimmet Personel Adı"].apply(norm_name)
     df["Norm_Teslim"] = df["Teslim Eden Personel"].apply(norm_name)
 
+    durum_col = None
+    for c in ["Teslim Durumu", "Teslim Saati"]:
+        if c in df.columns:
+            durum_col = c
+            break
+
     has_aciklama = "Açıklama" in df.columns
     has_kanali = "Kargo Teslimat Kanalı" in df.columns
 
     def check_devir(row):
+        # 1. Teslim Durumu / Saati sütununda "Teslim Edilmedi / Bekletiliyor" geçiyorsa devirdir.
+        if durum_col:
+            d_val = str(row[durum_col]).strip().upper()
+            if "BEKLETİLİYOR" in d_val or "EDİLMEDİ" in d_val or "BEKLETILIYOR" in d_val or "EDILMEDI" in d_val:
+                return True
+        
         z = row["Norm_Zimmet"]
         t = row["Norm_Teslim"]
-        if t == "" or t != z:
-            return True # Devir / Teslim Edilemeyen
-        return False # Teslim Edildi
+        
+        # 2. Teslim Eden Personel sütununda farklı bir isim yazıyorsa devirdir.
+        if t != "" and t != z:
+            return True
+            
+        # Eğer Teslim Eden Personel boşsa ve durum normal ise teslim edilmiştir (devir değildir).
+        return False
 
     df["Is_Devir"] = df.apply(check_devir, axis=1)
 
@@ -257,7 +273,7 @@ def process_excel_data(df):
             return "SMS"
         elif "KAPIYA" in kanali:
             return "KS"
-        elif kanali == "" and "POS ENTEGRASYON" in aciklama:
+        elif (kanali == "" or kanali == "NAN") and "POS ENTEGRASYON" in aciklama:
             return "KS-PE"
         
         if "İMZA" in aciklama or "IMZA" in aciklama:
