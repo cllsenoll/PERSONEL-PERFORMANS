@@ -214,7 +214,7 @@ def smart_read_file(uploaded_file):
     raise Exception("Dosya yapısı çözümlenemedi. Lütfen dosyanın bozuk olmadığını kontrol edin.")
 
 # ==========================================
-# AT ZİMMET İZLEME VERİ İŞLEME MOTORU (DÜZELTİLMİŞ KURALLAR)
+# AT ZİMMET İZLEME VERİ İŞLEME MOTORU (KESİN KURALLAR)
 # ==========================================
 def process_excel_data(df):
     df.columns = df.columns.astype(str).str.strip()
@@ -255,7 +255,7 @@ def process_excel_data(df):
         if t != "" and t != z:
             return True
             
-        # Eğer Teslim Eden Personel boşsa ve durum normal ise teslim edilmiştir (devir değildir).
+        # Teslim Eden Personel boşsa veya aynı isimse teslim edilmiştir (devir değildir).
         return False
 
     df["Is_Devir"] = df.apply(check_devir, axis=1)
@@ -271,7 +271,7 @@ def process_excel_data(df):
             return "İMZA"
         elif "SMS" in kanali:
             return "SMS"
-        elif "KAPIYA" in kanali:
+        elif "KAPIYA" in kanali or "KAPIYA BIRAKILDI" in kanali:
             return "KS"
         elif (kanali == "" or kanali == "NAN") and "POS ENTEGRASYON" in aciklama:
             return "KS-PE"
@@ -287,6 +287,7 @@ def process_excel_data(df):
 
     df["Custom_Channel"] = df.apply(get_channel_type, axis=1)
 
+    # Yalnızca AT Zimmet Personel Adı sütununda adı geçen personeller
     valid_df = df[
         df["Norm_Zimmet"].notna() & 
         (df["Norm_Zimmet"] != "") & 
