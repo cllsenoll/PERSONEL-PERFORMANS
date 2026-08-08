@@ -1,1 +1,20 @@
+streamlit
+pandas
+plotly
+openpyxl
+xlrd
+pyxlsb
+chardet
+streamlit
+pandas
+openpyxl
+xlrd
+lxml
+html5lib
+fpdf
+reportlab
+streamlit
+pandas
+openpyxl
 
+openpyxl
