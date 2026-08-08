@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import io
-import plotly.express as px
 import os
 import base64
 import re
@@ -236,9 +235,6 @@ def process_excel_data(df):
     has_aciklama = "Açıklama" in df.columns
     has_kanali = "Kargo Teslimat Kanalı" in df.columns
 
-    # Kurallara göre satır analizi:
-    # 3. Kural: Zimmet Personel == Teslim Eden Personel -> Teslim Edilen
-    # 4. Kural: Teslim Eden Personel boş ya da farklı -> Devir (Teslim Edilemeyen)
     def check_devir(row):
         z = row["Norm_Zimmet"]
         t = row["Norm_Teslim"]
@@ -249,7 +245,6 @@ def process_excel_data(df):
     df["Is_Devir"] = df.apply(check_devir, axis=1)
 
     def get_channel_type(row):
-        # Yalnızca teslim edilenlerde (Zimmet == Teslim Eden) kanallara bakılır
         if row["Is_Devir"] == True:
             return "DEVİR"
 
@@ -265,7 +260,6 @@ def process_excel_data(df):
         elif kanali == "" and "POS ENTEGRASYON" in aciklama:
             return "KS-PE"
         
-        # Ek tarama
         if "İMZA" in aciklama or "IMZA" in aciklama:
             return "İMZA"
         elif "SMS" in aciklama:
@@ -277,7 +271,6 @@ def process_excel_data(df):
 
     df["Custom_Channel"] = df.apply(get_channel_type, axis=1)
 
-    # 1. Kural: Yalnızca AT Zimmet Personel Adı sütununda adı geçen personeller
     valid_df = df[
         df["Norm_Zimmet"].notna() & 
         (df["Norm_Zimmet"] != "") & 
@@ -292,21 +285,16 @@ def process_excel_data(df):
         p_name = p_df["AT Zimmet Personel Adı"].mode()[0] if not p_df["AT Zimmet Personel Adı"].mode().empty else norm_p
         p_name = " ".join(str(p_name).split())
         
-        # 2. Kural: Satır sayısı = Zimmetli kargo sayısı
         zimmet_cnt = len(p_df)
-        
-        # 4. Kural: Devir (Teslim Edilemeyen) sayısı
         devir_df = p_df[p_df["Is_Devir"] == True]
         teslim_edilemeyen_cnt = len(devir_df)
         
-        # 3. Kural: Teslim Edilen sayısı
         teslim_cnt = zimmet_cnt - teslim_edilemeyen_cnt
         if teslim_cnt < 0:
             teslim_cnt = 0
         
         success_rate = round((teslim_cnt / zimmet_cnt) * 100, 1) if zimmet_cnt > 0 else 0.0
         
-        # 5. Kural: Kanal Bazlı Dağılımlar
         teslim_edilen_df = p_df[p_df["Is_Devir"] == False]
         imza_cnt = len(teslim_edilen_df[teslim_edilen_df["Custom_Channel"] == "İMZA"])
         sms_cnt = len(teslim_edilen_df[teslim_edilen_df["Custom_Channel"] == "SMS"])
