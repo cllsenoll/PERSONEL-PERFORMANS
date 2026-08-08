@@ -128,6 +128,11 @@ def clean_string(text):
     text = re.sub(r'[^A-Z0-9]', '', text)
     return text
 
+def norm_name(val):
+    if pd.isna(val) or not val:
+        return ""
+    return " ".join(str(val).upper().split())
+
 # ==========================================
 # OTOMATİK KURYE FOTOĞRAFI ALMA
 # ==========================================
@@ -214,7 +219,7 @@ def smart_read_file(uploaded_file):
     raise Exception("Dosya yapısı çözümlenemedi. Lütfen dosyanın bozuk olmadığını kontrol edin.")
 
 # ==========================================
-# AT ZİMMET İZLEME VERİ İŞLEME MOTORU (KESİN KURALLAR)
+# AT ZİMMET İZLEME VERİ İŞLEME MOTORU (TAM KURALLARA GÖRE)
 # ==========================================
 def process_excel_data(df):
     df.columns = df.columns.astype(str).str.strip()
@@ -223,11 +228,6 @@ def process_excel_data(df):
     
     if missing_cols:
         return None, missing_cols
-
-    def norm_name(val):
-        if pd.isna(val) or not val:
-            return ""
-        return " ".join(str(val).upper().split())
 
     df["Norm_Zimmet"] = df["AT Zimmet Personel Adı"].apply(norm_name)
     df["Norm_Teslim"] = df["Teslim Eden Personel"].apply(norm_name)
@@ -251,11 +251,11 @@ def process_excel_data(df):
         z = row["Norm_Zimmet"]
         t = row["Norm_Teslim"]
         
-        # 2. Teslim Eden Personel sütununda farklı bir isim yazıyorsa devirdir.
+        # 2. Teslim Eden Personel dolu ve AT Zimmet Personelinden farklıysa devirdir.
         if t != "" and t != z:
             return True
             
-        # Teslim Eden Personel boşsa veya aynı isimse teslim edilmiştir (devir değildir).
+        # 3. Teslim Eden Personel boşsa veya aynı isimse teslim edilmiştir (devir değildir).
         return False
 
     df["Is_Devir"] = df.apply(check_devir, axis=1)
@@ -287,7 +287,7 @@ def process_excel_data(df):
 
     df["Custom_Channel"] = df.apply(get_channel_type, axis=1)
 
-    # Yalnızca AT Zimmet Personel Adı sütununda adı geçen personeller
+    # 1. Kural: Yalnızca AT Zimmet Personel Adı sütununda adı geçen geçerli personeller
     valid_df = df[
         df["Norm_Zimmet"].notna() & 
         (df["Norm_Zimmet"] != "") & 
@@ -302,16 +302,21 @@ def process_excel_data(df):
         p_name = p_df["AT Zimmet Personel Adı"].mode()[0] if not p_df["AT Zimmet Personel Adı"].mode().empty else norm_p
         p_name = " ".join(str(p_name).split())
         
+        # 2. Kural: Satır sayısı = Zimmetli kargo sayısı
         zimmet_cnt = len(p_df)
+        
+        # 4. Kural: Devir (Teslim Edilemeyen) sayısı
         devir_df = p_df[p_df["Is_Devir"] == True]
         teslim_edilemeyen_cnt = len(devir_df)
         
+        # 3. Kural: Teslim Edilen sayısı
         teslim_cnt = zimmet_cnt - teslim_edilemeyen_cnt
         if teslim_cnt < 0:
             teslim_cnt = 0
         
         success_rate = round((teslim_cnt / zimmet_cnt) * 100, 1) if zimmet_cnt > 0 else 0.0
         
+        # 5. Kural: Kanal Bazlı Dağılımlar
         teslim_edilen_df = p_df[p_df["Is_Devir"] == False]
         imza_cnt = len(teslim_edilen_df[teslim_edilen_df["Custom_Channel"] == "İMZA"])
         sms_cnt = len(teslim_edilen_df[teslim_edilen_df["Custom_Channel"] == "SMS"])
