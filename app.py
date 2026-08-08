@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import plotly.express as px
 import os
 import base64
 import re
@@ -214,7 +215,7 @@ def smart_read_file(uploaded_file):
     raise Exception("Dosya yapısı çözümlenemedi. Lütfen dosyanın bozuk olmadığını kontrol edin.")
 
 # ==========================================
-# AT ZİMMET İZLEME VERİ İŞLEME MOTORU (NET KURALLAR)
+# AT ZİMMET İZLEME VERİ İŞLEME MOTORU (YENİ KURALLAR)
 # ==========================================
 def process_excel_data(df):
     df.columns = df.columns.astype(str).str.strip()
@@ -231,45 +232,52 @@ def process_excel_data(df):
 
     df["Norm_Zimmet"] = df["AT Zimmet Personel Adı"].apply(norm_name)
     df["Norm_Teslim"] = df["Teslim Eden Personel"].apply(norm_name)
-    
-    durum_col = None
-    for c in ["Teslim Durumu", "Teslim Saati"]:
-        if c in df.columns:
-            durum_col = c
-            break
 
     has_aciklama = "Açıklama" in df.columns
     has_kanali = "Kargo Teslimat Kanalı" in df.columns
 
-    def is_devir(row):
-        if durum_col:
-            d_val = str(row[durum_col]).strip().upper()
-            if "BEKLETİLİYOR" in d_val or "EDİLMEDİ" in d_val or "BEKLETILIYOR" in d_val or "EDILMEDI" in d_val:
-                return True
-        
-        z_name = row["Norm_Zimmet"]
-        t_name = row["Norm_Teslim"]
-        if t_name == "" or t_name != z_name:
-            return True
-            
-        return False
+    # Kurallara göre satır analizi:
+    # 3. Kural: Zimmet Personel == Teslim Eden Personel -> Teslim Edilen
+    # 4. Kural: Teslim Eden Personel boş ya da farklı -> Devir (Teslim Edilemeyen)
+    def check_devir(row):
+        z = row["Norm_Zimmet"]
+        t = row["Norm_Teslim"]
+        if t == "" or t != z:
+            return True # Devir / Teslim Edilemeyen
+        return False # Teslim Edildi
+
+    df["Is_Devir"] = df.apply(check_devir, axis=1)
 
     def get_channel_type(row):
+        # Yalnızca teslim edilenlerde (Zimmet == Teslim Eden) kanallara bakılır
+        if row["Is_Devir"] == True:
+            return "DEVİR"
+
         kanali = str(row["Kargo Teslimat Kanalı"]).strip().upper() if has_kanali else ""
         aciklama = str(row["Açıklama"]).strip().upper() if has_aciklama else ""
-        
-        blob = f"{kanali} {aciklama}"
-        if "SMS" in blob:
-            return "SMS"
-        elif "İMZA" in blob or "IMZA" in blob:
+
+        if "İMZA" in kanali or "IMZA" in kanali:
             return "İMZA"
-        elif "POS" in blob or "KONTROL" in blob or "KAPIYA" in blob:
+        elif "SMS" in kanali:
+            return "SMS"
+        elif "KAPIYA" in kanali:
+            return "KS"
+        elif kanali == "" and "POS ENTEGRASYON" in aciklama:
             return "KS-PE"
+        
+        # Ek tarama
+        if "İMZA" in aciklama or "IMZA" in aciklama:
+            return "İMZA"
+        elif "SMS" in aciklama:
+            return "SMS"
+        elif "KAPIYA" in aciklama:
+            return "KS"
+            
         return "DİĞER"
 
-    df["Is_Devir"] = df.apply(is_devir, axis=1)
     df["Custom_Channel"] = df.apply(get_channel_type, axis=1)
 
+    # 1. Kural: Yalnızca AT Zimmet Personel Adı sütununda adı geçen personeller
     valid_df = df[
         df["Norm_Zimmet"].notna() & 
         (df["Norm_Zimmet"] != "") & 
@@ -284,19 +292,25 @@ def process_excel_data(df):
         p_name = p_df["AT Zimmet Personel Adı"].mode()[0] if not p_df["AT Zimmet Personel Adı"].mode().empty else norm_p
         p_name = " ".join(str(p_name).split())
         
+        # 2. Kural: Satır sayısı = Zimmetli kargo sayısı
         zimmet_cnt = len(p_df)
+        
+        # 4. Kural: Devir (Teslim Edilemeyen) sayısı
         devir_df = p_df[p_df["Is_Devir"] == True]
         teslim_edilemeyen_cnt = len(devir_df)
         
+        # 3. Kural: Teslim Edilen sayısı
         teslim_cnt = zimmet_cnt - teslim_edilemeyen_cnt
         if teslim_cnt < 0:
             teslim_cnt = 0
         
         success_rate = round((teslim_cnt / zimmet_cnt) * 100, 1) if zimmet_cnt > 0 else 0.0
         
+        # 5. Kural: Kanal Bazlı Dağılımlar
         teslim_edilen_df = p_df[p_df["Is_Devir"] == False]
-        sms_cnt = len(teslim_edilen_df[teslim_edilen_df["Custom_Channel"] == "SMS"])
         imza_cnt = len(teslim_edilen_df[teslim_edilen_df["Custom_Channel"] == "İMZA"])
+        sms_cnt = len(teslim_edilen_df[teslim_edilen_df["Custom_Channel"] == "SMS"])
+        ks_cnt = len(teslim_edilen_df[teslim_edilen_df["Custom_Channel"] == "KS"])
         ks_pe_cnt = len(teslim_edilen_df[teslim_edilen_df["Custom_Channel"] == "KS-PE"])
 
         summary.append({
@@ -305,8 +319,9 @@ def process_excel_data(df):
             "Teslim Edilen": teslim_cnt,
             "Teslim Edilemeyen": teslim_edilemeyen_cnt,
             "Başarı Oranı": success_rate,
+            "İMZA": imza_cnt,
             "SMS": sms_cnt,
-            "İmza": imza_cnt,
+            "KS": ks_cnt,
             "KS-PE": ks_pe_cnt
         })
 
@@ -392,8 +407,8 @@ if st.session_state.active_tab == "Ana Panel":
         with col_right:
             st.subheader("📲 Teslimat Kanalları Dağılımı")
             channel_df = pd.DataFrame({
-                "Kanal": ["SMS", "İmza", "KS-PE"],
-                "Adet": [perf_df["SMS"].sum(), perf_df["İmza"].sum(), perf_df["KS-PE"].sum()]
+                "Kanal": ["İMZA", "SMS", "KS", "KS-PE"],
+                "Adet": [perf_df["İMZA"].sum(), perf_df["SMS"].sum(), perf_df["KS"].sum(), perf_df["KS-PE"].sum()]
             }).set_index("Kanal")
             st.bar_chart(channel_df)
             
@@ -427,8 +442,9 @@ elif st.session_state.active_tab == "Kurye Performans":
             teslim = row["Teslim Edilen"]
             devir = row["Teslim Edilemeyen"]
             rate = row["Başarı Oranı"]
+            imza = row["İMZA"]
             sms = row["SMS"]
-            imza = row["İmza"]
+            ks = row["KS"]
             ks_pe = row["KS-PE"]
 
             avatar_url = get_courier_photo(p_name)
@@ -461,9 +477,10 @@ elif st.session_state.active_tab == "Kurye Performans":
                     </div>
                 </div>
                 <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06);">
-                    <div class="channel-badge">📲 SMS: <span class="badge-val">{sms}</span></div>
                     <div class="channel-badge">✍️ İMZA: <span class="badge-val">{imza}</span></div>
-                    <div class="channel-badge">🚪 KS-PE: <span class="badge-val">{ks_pe}</span></div>
+                    <div class="channel-badge">📲 SMS: <span class="badge-val">{sms}</span></div>
+                    <div class="channel-badge">🚪 KS: <span class="badge-val">{ks}</span></div>
+                    <div class="channel-badge">💳 KS-PE: <span class="badge-val">{ks_pe}</span></div>
                 </div>
             </div>
             """
