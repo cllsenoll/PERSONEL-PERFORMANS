@@ -116,7 +116,7 @@ custom_css = """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # ==========================================
-# TÜRKÇE TEMİZLEME FONKSİYONU
+# TÜRKÇE TEMİZLEME VE İSİM NORMALİZASYONU
 # ==========================================
 def clean_string(text):
     if pd.isna(text) or not text:
@@ -181,7 +181,7 @@ def get_courier_photo(courier_name):
     return f"https://ui-avatars.com/api/?name={courier_name.replace(' ', '+')}&background=0B172E&color=F57C00&bold=true&size=80"
 
 # ==========================================
-# AKILLI VE GELİŞMİŞ DOSYA OKUMA MOTORU
+# AKILLI DOSYA OKUMA MOTORU
 # ==========================================
 def smart_read_file(uploaded_file):
     file_bytes = uploaded_file.getvalue()
@@ -219,7 +219,7 @@ def smart_read_file(uploaded_file):
     raise Exception("Dosya yapısı çözümlenemedi. Lütfen dosyanın bozuk olmadığını kontrol edin.")
 
 # ==========================================
-# AT ZİMMET İZLEME VERİ İŞLEME MOTORU (KESİN KURALLAR)
+# AT ZİMMET İZLEME KESİN VERİ İŞLEME MOTORU
 # ==========================================
 def process_excel_data(df):
     df.columns = df.columns.astype(str).str.strip()
@@ -232,69 +232,44 @@ def process_excel_data(df):
     df["Norm_Zimmet"] = df["AT Zimmet Personel Adı"].apply(norm_name)
     df["Norm_Teslim"] = df["Teslim Eden Personel"].apply(norm_name)
 
-    durum_col = None
-    for c in ["Teslim Durumu", "Teslim Saati"]:
-        if c in df.columns:
-            durum_col = c
-            break
-
     has_aciklama = "Açıklama" in df.columns
     has_kanali = "Kargo Teslimat Kanalı" in df.columns
 
-    def check_devir(row):
-        # 1. Teslim Durumu / Saati sütununda "Teslim Edilmedi / Bekletiliyor" geçiyorsa devirdir.
-        if durum_col:
-            d_val = str(row[durum_col]).strip().upper()
-            if "BEKLETİLİYOR" in d_val or "EDİLMEDİ" in d_val or "BEKLETILIYOR" in d_val or "EDILMEDI" in d_val:
-                return True
-        
-        z = row["Norm_Zimmet"]
-        t = row["Norm_Teslim"]
-        
-        # 2. Kurallarınız gereği: Teslim Eden Personel boşsa VEYA Zimmet personeli ile farklıysa DEVİR sayılır.
-        if t == "" or t != z:
-            return True
-            
-        # 3. Yalnızca isimler birebir aynıysa teslim edilmiştir.
-        return False
-
-    df["Is_Devir"] = df.apply(check_devir, axis=1)
-
-    def get_channel_type(row):
-        if row["Is_Devir"] == True:
-            return "DEVİR"
-
-        kanali = str(row["Kargo Teslimat Kanalı"]).strip().upper() if has_kanali else ""
-        aciklama = str(row["Açıklama"]).strip().upper() if has_aciklama else ""
-
-        if "İMZA" in kanali or "IMZA" in kanali:
-            return "İMZA"
-        elif "SMS" in kanali:
-            return "SMS"
-        elif "KAPIYA" in kanali or "KAPIYA BIRAKILDI" in kanali:
-            return "KS"
-        elif (kanali == "" or kanali == "NAN") and "POS ENTEGRASYON" in aciklama:
-            return "KS-PE"
-        
-        if "İMZA" in aciklama or "IMZA" in aciklama:
-            return "İMZA"
-        elif "SMS" in aciklama:
-            return "SMS"
-        elif "KAPIYA" in aciklama:
-            return "KS"
-            
-        return "DİĞER"
-
-    df["Custom_Channel"] = df.apply(get_channel_type, axis=1)
-
-    # 1. Kural: Yalnızca AT Zimmet Personel Adı sütununda adı geçen personeller
+    # 1. Kural: Yalnızca AT Zimmet Personel Adı sütununda adı geçen geçerli personeller
     valid_df = df[
         df["Norm_Zimmet"].notna() & 
         (df["Norm_Zimmet"] != "") & 
         (df["Norm_Zimmet"] != "NAN") & 
         (df["Norm_Zimmet"] != "NONE")
     ].copy()
-    
+
+    # 3. & 4. Kurallar: Satır bazlı Teslim / Devir Tespiti
+    def evaluate_row(row):
+        z = row["Norm_Zimmet"]
+        t = row["Norm_Teslim"]
+        
+        # 4. Kural: Teslim Eden Personel boşsa veya farklıysa -> Devir (Teslim Edilemeyen)
+        if t == "" or t != z:
+            return "DEVİR"
+        
+        # 3. Kural: AT Zimmet ve Teslim Eden aynı ise -> Teslim Edilen
+        kanali = str(row["Kargo Teslimat Kanalı"]).strip().upper() if has_kanali else ""
+        aciklama = str(row["Açıklama"]).strip().upper() if has_aciklama else ""
+
+        # 5. Kural: Kanal Ayrışımı (Aynı personel şartıyla)
+        if "İMZA" in kanali or "IMZA" in kanali or "İMZA" in aciklama or "IMZA" in aciklama:
+            return "İMZA"
+        elif "SMS" in kanali or "SMS" in aciklama:
+            return "SMS"
+        elif "KAPIYA" in kanali or "KAPIYA BIRAKILDI" in kanali or "KAPIYA" in aciklama:
+            return "KS"
+        elif (kanali == "" or kanali == "NAN") and "POS ENTEGRASYON" in aciklama:
+            return "KS-PE"
+        
+        return "TESLİM_DİĞER"
+
+    valid_df["Islem_Sonucu"] = valid_df.apply(evaluate_row, axis=1)
+
     personnel_groups = valid_df.groupby("Norm_Zimmet")
     
     summary = []
@@ -302,26 +277,24 @@ def process_excel_data(df):
         p_name = p_df["AT Zimmet Personel Adı"].mode()[0] if not p_df["AT Zimmet Personel Adı"].mode().empty else norm_p
         p_name = " ".join(str(p_name).split())
         
-        # 2. Kural: Satır sayısı = Zimmetli kargo sayısı
+        # 2. Kural: Satır sayısı = Toplam Zimmetli Kargo Sayısı
         zimmet_cnt = len(p_df)
         
-        # 4. Kural: Devir (Teslim Edilemeyen) sayısı
-        devir_df = p_df[p_df["Is_Devir"] == True]
+        # Devir Sayısı (4. Kural)
+        devir_df = p_df[p_df["Islem_Sonucu"] == "DEVİR"]
         teslim_edilemeyen_cnt = len(devir_df)
         
-        # 3. Kural: Teslim Edilen sayısı
-        teslim_cnt = zimmet_cnt - teslim_edilemeyen_cnt
-        if teslim_cnt < 0:
-            teslim_cnt = 0
+        # Teslim Edilen Sayısı (3. Kural: Aynı olanların toplamı)
+        teslim_edilen_df = p_df[p_df["Islem_Sonucu"] != "DEVİR"]
+        teslim_cnt = len(teslim_edilen_df)
         
         success_rate = round((teslim_cnt / zimmet_cnt) * 100, 1) if zimmet_cnt > 0 else 0.0
         
-        # 5. Kural: Kanal Bazlı Dağılımlar
-        teslim_edilen_df = p_df[p_df["Is_Devir"] == False]
-        imza_cnt = len(teslim_edilen_df[teslim_edilen_df["Custom_Channel"] == "İMZA"])
-        sms_cnt = len(teslim_edilen_df[teslim_edilen_df["Custom_Channel"] == "SMS"])
-        ks_cnt = len(teslim_edilen_df[teslim_edilen_df["Custom_Channel"] == "KS"])
-        ks_pe_cnt = len(teslim_edilen_df[teslim_edilen_df["Custom_Channel"] == "KS-PE"])
+        # 5. Kural: Kanal Bazlı Dağılımlar (Yalnızca aynı isimli olanlar üzerinden)
+        imza_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "İMZA"])
+        sms_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "SMS"])
+        ks_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "KS"])
+        ks_pe_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "KS-PE"])
 
         summary.append({
             "Personel": p_name,
@@ -371,7 +344,7 @@ with st.sidebar:
         st.session_state.active_tab = "Kurye Performans"
 
 # ==========================================
-# AKILLI VERİ DAĞITIM VE İŞLEME MİMARİSİ
+# AKILLI VERİ YÖNETİMİ
 # ==========================================
 if uploaded_file is not None:
     try:
