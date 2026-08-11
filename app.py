@@ -140,6 +140,13 @@ custom_css = """
         margin-bottom: 25px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
+    .stat-label {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+    }
     
     /* İlerleme Çubukları */
     .progress-container {
@@ -270,7 +277,7 @@ def smart_read_file(uploaded_file):
     raise Exception("Dosya yapısı çözümlenemedi. Lütfen dosyanın bozuk olmadığını kontrol edin.")
 
 # ==========================================
-# AT ZİMMET İZLEME TAM UYUMLU İŞLEME MOTORU
+# AT ZİMMET İZLEME TAM UYUMLU İŞLEME MOTORU (YENİ MANTIK)
 # ==========================================
 def process_excel_data(df):
     df.columns = df.columns.astype(str).str.strip()
@@ -280,59 +287,47 @@ def process_excel_data(df):
     if missing_cols:
         return None, missing_cols
 
-    df["Norm_Zimmet"] = df["AT Zimmet Personel Adı"].apply(norm_name)
-    df["Norm_Teslim"] = df["Teslim Eden Personel"].apply(norm_name)
-
-    durum_col = None
-    for c in ["Teslim Durumu", "Teslim Saati"]:
-        if c in df.columns:
-            durum_col = c
-            break
-
-    has_aciklama = "Açıklama" in df.columns
-    has_kanali = "Kargo Teslimat Kanalı" in df.columns
-
+    # 1. Yalnızca AT Zimmet Personel Adı sütununda adı geçen geçerli satırlar alınır
     valid_df = df[
-        df["Norm_Zimmet"].notna() & 
-        (df["Norm_Zimmet"] != "") & 
-        (df["Norm_Zimmet"] != "NAN") & 
-        (df["Norm_Zimmet"] != "NONE")
+        df["AT Zimmet Personel Adı"].notna() & 
+        (df["AT Zimmet Personel Adı"].astype(str).str.strip() != "") & 
+        (df["AT Zimmet Personel Adı"].astype(str).str.strip().str.upper() != "NAN") & 
+        (df["AT Zimmet Personel Adı"].astype(str).str.strip().str.upper() != "NONE")
     ].copy()
 
-    def evaluate_row(row):
-        if durum_col:
-            d_val = str(row[durum_col]).strip().upper()
-            if "BEKLETİLİYOR" in d_val or "EDİLMEDİ" in d_val or "BEKLETILIYOR" in d_val or "EDILMEDI" in d_val:
-                return "DEVİR"
+    valid_df["Norm_Zimmet"] = valid_df["AT Zimmet Personel Adı"].apply(norm_name)
+    valid_df["Norm_Teslim"] = valid_df["Teslim Eden Personel"].apply(norm_name)
 
+    has_kanali = "Kargo Teslimat Kanalı" in valid_df.columns
+    has_aciklama = "Açıklama" in valid_df.columns
+
+    def evaluate_row(row):
         z = row["Norm_Zimmet"]
         t = row["Norm_Teslim"]
         
+        # 4. Teslim Eden Personel farklı veya boş/nan ise DEVİR (Teslim Edilemeyen)
         if t == "" or t == "NAN" or t == "NONE" or t != z:
-            return "DEVİR"
+            return "DEVİR", ""
         
+        # 3. Aynı personel ise TESLİM
         kanali = str(row["Kargo Teslimat Kanalı"]).strip().upper() if has_kanali else ""
         aciklama = str(row["Açıklama"]).strip().upper() if has_aciklama else ""
 
-        if "İMZA" in kanali or "IMZA" in kanali:
-            return "İMZA"
+        # 5. Kanal ve Açıklama Kontrolleri
+        if "İMZA" in kanali:
+            return "TESLİM", "İMZA"
         elif "SMS" in kanali:
-            return "SMS"
-        elif "KAPIYA" in kanali or "KAPIYA BIRAKILDI" in kanali:
-            return "KS"
+            return "TESLİM", "SMS"
+        elif "KAPIYA BIRAKILDI" in kanali:
+            return "TESLİM", "KS"
         elif (kanali == "" or kanali == "NAN" or kanali == "-") and "POS ENTEGRASYON" in aciklama:
-            return "KS-PE"
+            return "TESLİM", "KS-PE"
         
-        if "İMZA" in aciklama or "IMZA" in aciklama:
-            return "İMZA"
-        elif "SMS" in aciklama:
-            return "SMS"
-        elif "KAPIYA" in aciklama:
-            return "KS"
-            
-        return "TESLİM_DİĞER"
+        return "TESLİM", "DİĞER"
 
-    valid_df["Islem_Sonucu"] = valid_df.apply(evaluate_row, axis=1)
+    results = valid_df.apply(evaluate_row, axis=1)
+    valid_df["Durum"] = [r[0] for r in results]
+    valid_df["Kanal"] = [r[1] for r in results]
 
     personnel_groups = valid_df.groupby("Norm_Zimmet")
     
@@ -341,21 +336,23 @@ def process_excel_data(df):
         p_name = p_df["AT Zimmet Personel Adı"].mode()[0] if not p_df["AT Zimmet Personel Adı"].mode().empty else norm_p
         p_name = " ".join(str(p_name).split())
         
+        # 2. Toplam Satır = Zimmet Sayısı
         zimmet_cnt = len(p_df)
-        devir_df = p_df[p_df["Islem_Sonucu"] == "DEVİR"]
+        
+        # Teslim ve Devir sayıları
+        devir_df = p_df[p_df["Durum"] == "DEVİR"]
         teslim_edilemeyen_cnt = len(devir_df)
         
-        teslim_cnt = zimmet_cnt - teslim_edilemeyen_cnt
-        if teslim_cnt < 0:
-            teslim_cnt = 0
+        teslim_df = p_df[p_df["Durum"] == "TESLİM"]
+        teslim_cnt = len(teslim_df)
         
         success_rate = round((teslim_cnt / zimmet_cnt) * 100, 1) if zimmet_cnt > 0 else 0.0
         
-        teslim_edilen_df = p_df[p_df["Islem_Sonucu"] != "DEVİR"]
-        imza_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "İMZA"])
-        sms_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "SMS"])
-        ks_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "KS"])
-        ks_pe_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "KS-PE"])
+        # 5. Kanal Kırılımları
+        imza_cnt = len(teslim_df[teslim_df["Kanal"] == "İMZA"])
+        sms_cnt = len(teslim_df[teslim_df["Kanal"] == "SMS"])
+        ks_cnt = len(teslim_df[teslim_df["Kanal"] == "KS"])
+        ks_pe_cnt = len(teslim_df[teslim_df["Kanal"] == "KS-PE"])
 
         summary.append({
             "Personel": p_name,
@@ -485,7 +482,7 @@ if st.session_state.active_tab == "Ana Panel":
         st.markdown('</div>', unsafe_allow_html=True)
         
         # ----------------------------------------------------
-        # 2. KART: Teslimat Kanalları Dağılımı (Temizlenmiş Metin / Streamlit Bileşeni)
+        # 2. KART: Teslimat Kanalları Dağılımı
         # ----------------------------------------------------
         st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
         st.markdown("<h3 style='color: #FFB703 !important; margin-bottom: 20px;'>📲 Teslimat Kanalları Dağılımı</h3>", unsafe_allow_html=True)
@@ -511,7 +508,6 @@ if st.session_state.active_tab == "Ana Panel":
             st.markdown('<div style="font-size: 18px; font-weight: bold; color: #FF6B6B; margin-bottom: 2px;">İMZA</div>', unsafe_allow_html=True)
             st.markdown(f'<div style="font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 12px;">Yüzde: %{imza_oran}</div>', unsafe_allow_html=True)
             
-            # Kod bozulmasına yol açan karmaşık HTML yerine doğrudan güvenli Streamlit metric bileşeni kullanıldı
             st.metric(label="TOPLAM İŞLEM ADEDİ", value=f"{toplam_kanal:,} Adet")
             
         with chan_sag:
