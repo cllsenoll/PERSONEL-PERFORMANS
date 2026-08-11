@@ -131,14 +131,26 @@ custom_css = """
         color: #FFB703 !important;
     }
     
-    /* Modern Grafik Kartı Tasarımı */
-    .chart-card {
-        background: linear-gradient(135deg, #1E3E62 0%, #0B192C 100%);
-        border: 1px solid rgba(255, 183, 3, 0.3);
-        border-radius: 14px;
-        padding: 20px;
+    /* Örnek Tarzı Modern Dashboard Kartları */
+    .dashboard-card {
+        background: linear-gradient(135deg, #162A45 0%, #0B192C 100%);
+        border: 1px solid rgba(255, 183, 3, 0.25);
+        border-radius: 16px;
+        padding: 24px;
         margin-bottom: 20px;
-        box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+    .stat-box-title {
+        font-size: 12px;
+        color: rgba(255,255,255,0.5);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .stat-box-val {
+        font-size: 26px;
+        font-weight: 800;
+        color: #FFB703;
+        margin-bottom: 15px;
     }
 </style>
 """
@@ -421,24 +433,47 @@ if st.session_state.active_tab == "Ana Panel":
         
         st.markdown("---")
         
-        col_left, col_right = st.columns(2)
+        # 1. KART: Kurye Başarı Oranları (Örnek Görseldeki Sol-Sağ Dağılımlı Tasarım)
+        st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #FFB703 !important; margin-bottom: 15px;'>📊 Kurye Başarı Oranları (%)</h3>", unsafe_allow_html=True)
         
-        with col_left:
-            st.markdown('<div class="chart-card">', unsafe_allow_html=True)
-            st.markdown("<h4 style='color: #FFB703 !important; margin-bottom: 10px;'>📊 Kurye Başarı Oranları (%)</h4>", unsafe_allow_html=True)
+        col_sol, col_sag = st.columns([1, 2])
+        with col_sol:
+            st.markdown(f"""
+                <div style="padding-top: 15px;">
+                    <div class="stat-box-title">En Başarılı Oran</div>
+                    <div class="stat-box-val">%{perf_df['Başarı Oranı'].max() if not perf_df.empty else 0}</div>
+                    <div class="stat-box-title">Aktif Kurye Sayısı</div>
+                    <div class="stat-box-val" style="color: #00B4D8;">{len(perf_df)} Kişi</div>
+                </div>
+            """, unsafe_allow_html=True)
+        with col_sag:
             chart_df = perf_df.set_index("Personel")[["Başarı Oranı"]]
             st.bar_chart(chart_df)
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-        with col_right:
-            st.markdown('<div class="chart-card">', unsafe_allow_html=True)
-            st.markdown("<h4 style='color: #FFB703 !important; margin-bottom: 10px;'>📲 Teslimat Kanalları Dağılımı</h4>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # 2. KART: Teslimat Kanalları Dağılımı (Örnek Görseldeki Halka Grafik & Çoklu Çubuk Tarzı)
+        st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #FFB703 !important; margin-bottom: 15px;'>📲 Teslimat Kanalları Dağılımı</h3>", unsafe_allow_html=True)
+        
+        col_chan_sol, col_chan_sag = st.columns([1, 2])
+        total_teslim_adet = perf_df["İMZA"].sum() + perf_df["SMS"].sum() + perf_df["KS"].sum() + perf_df["KS-PE"].sum()
+        with col_chan_sol:
+            st.markdown(f"""
+                <div style="padding-top: 15px;">
+                    <div class="stat-box-title">Toplam İşlem Adedi</div>
+                    <div class="stat-box-val" style="color: #4CAF50;">{total_teslim_adet:,}</div>
+                    <div class="stat-box-title">En Çok Kullanılan Kanal</div>
+                    <div class="stat-box-val" style="color: #00B4D8;">İMZA / SMS</div>
+                </div>
+            """, unsafe_allow_html=True)
+        with col_chan_sag:
             channel_df = pd.DataFrame({
                 "Kanal": ["İMZA", "SMS", "KS", "KS-PE"],
                 "Adet": [perf_df["İMZA"].sum(), perf_df["SMS"].sum(), perf_df["KS"].sum(), perf_df["KS-PE"].sum()]
             }).set_index("Kanal")
             st.bar_chart(channel_df)
-            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
             
         st.subheader("📋 Genel Performans Tablosu")
         st.dataframe(perf_df, use_container_width=True)
