@@ -25,139 +25,469 @@ KULLANICI_ISIM = "Celal ŞENOL"
 KULLANICI_GOREV = "Şube Şefi"
 
 # ==========================================
-# CSS VE MODERN GÖRSEL BİLEŞEN TASARIMLARI
+# CSS VE TRANSLATE KORUMA KODLARI
 # ==========================================
 custom_css = """
 <style>
-    .notranslate { translate: no !important; }
-    .stApp { background-color: #0B192C !important; color: #FFFFFF !important; }
-    h1, h2, h3, h4, h5, h6, p, span, label { color: #FFFFFF !important; font-family: 'Segoe UI', sans-serif; }
-    [data-testid="stSidebar"] { background-color: #1E3E62 !important; border-right: 1px solid rgba(255, 255, 255, 0.08); }
-    [data-testid="stSidebar"] div.stButton > button { width: 100% !important; height: 48px !important; border-radius: 10px !important; font-weight: 600 !important; background: linear-gradient(135deg, #00B4D8 0%, #0077B6 100%) !important; color: #FFFFFF !important; border: 1px solid #90E0EF !important; box-shadow: 0 6px 0 #03045E, 0 8px 10px rgba(0, 0, 0, 0.4) !important; margin-bottom: 10px !important; text-align: left !important; padding-left: 15px !important; }
-    [data-testid="stFileUploader"] section { background: linear-gradient(135deg, #FFD166 0%, #FFB703) !important; border: 2px dashed #FB8500 !important; border-radius: 12px !important; }
-    [data-testid="stFileUploader"] section * { color: #000000 !important; }
-    .person-card { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 16px 20px; margin-bottom: 14px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
-    .dashboard-card { background: linear-gradient(135deg, #162A45 0%, #0B192C 100%); border: 1px solid rgba(255, 183, 3, 0.3); border-radius: 16px; padding: 24px; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-    .progress-bar-fill-orange { background: linear-gradient(90deg, #FB8500 0%, #FFB703 100%); height: 10px; border-radius: 6px; }
+    .notranslate {
+        translate: no !important;
+    }
+    .stApp {
+        background-color: #070E1E;
+        color: #FFFFFF;
+    }
+    h1, h2, h3, h4, h5, h6, p, span, label {
+        color: #FFFFFF !important;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    [data-testid="stSidebar"] {
+        background-color: #0B172E !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    [data-testid="stSidebar"] div.stButton > button {
+        width: 100% !important;
+        height: 48px !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        background: linear-gradient(135deg, #0A58CA 0%, #032057 100%) !important;
+        color: #FFFFFF !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        margin-bottom: 6px !important;
+        text-align: left !important;
+        padding-left: 15px !important;
+    }
+    [data-testid="stSidebar"] div.stButton > button:hover {
+        background: linear-gradient(135deg, #0D6EFD 0%, #0A58CA 100%) !important;
+        border-color: #F57C00 !important;
+    }
+    .person-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 16px 20px;
+        margin-bottom: 14px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    .profile-section {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .avatar-circle {
+        width: 62px;
+        height: 62px;
+        border-radius: 50%;
+        border: 2px solid #F57C00;
+        object-fit: cover;
+        background-color: #0B172E;
+    }
+    .person-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: #FFFFFF !important;
+    }
+    .metric-title {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.5) !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+    }
+    .metric-value {
+        font-size: 19px;
+        font-weight: 700;
+    }
+    .channel-badge {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 12px;
+        display: inline-block;
+        margin-right: 8px;
+        margin-top: 8px;
+    }
+    .badge-val {
+        font-weight: 700;
+        color: #F57C00 !important;
+    }
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # ==========================================
-# YARDIMCI FONKSİYONLAR
+# İSİM TEMİZLEME VE NORMALİZASYON
 # ==========================================
 def clean_string(text):
-    if pd.isna(text) or not text: return ""
+    if pd.isna(text) or not text:
+        return ""
     text = str(text).upper().strip()
     replacements = {'İ': 'I', 'I': 'I', 'Ş': 'S', 'Ğ': 'G', 'Ü': 'U', 'Ö': 'O', 'Ç': 'C'}
-    for search, replace in replacements.items(): text = text.replace(search, replace)
-    return re.sub(r'[^A-Z0-9]', '', text)
+    for search, replace in replacements.items():
+        text = text.replace(search, replace)
+    text = re.sub(r'[^A-Z0-9]', '', text)
+    return text
 
 def norm_name(val):
-    if pd.isna(val) or not val: return ""
+    if pd.isna(val) or not val:
+        return ""
     return " ".join(str(val).upper().split())
 
+# ==========================================
+# OTOMATİK KURYE FOTOĞRAFI ALMA
+# ==========================================
 def get_courier_photo(courier_name):
-    # Basit bir placeholder dönüşü
-    return f"https://ui-avatars.com/api/?name={courier_name.replace(' ', '+')}&background=1E3E62&color=FFB703&bold=true&size=80"
+    clean_courier = clean_string(courier_name)
+    search_dirs = []
+    if os.path.exists("kuryeler"):
+        search_dirs.append("kuryeler")
+    search_dirs.append(".") 
+
+    for target_dir in search_dirs:
+        try:
+            files = os.listdir(target_dir)
+            for file in files:
+                file_path = os.path.join(target_dir, file)
+                if os.path.isfile(file_path):
+                    ext = os.path.splitext(file)[1].lower().replace('.', '')
+                    if ext in ['png', 'jpg', 'jpeg', 'webp']:
+                        file_name_clean = clean_string(os.path.splitext(file)[0])
+                        if file_name_clean == clean_courier:
+                            try:
+                                with open(file_path, "rb") as image_file:
+                                    encoded_string = base64.b64encode(image_file.read()).decode()
+                                    mime_type = "image/png" if ext == "png" else f"image/{ext}"
+                                    return f"data:{mime_type};base64,{encoded_string}"
+                            except Exception:
+                                pass
+
+            for file in files:
+                file_path = os.path.join(target_dir, file)
+                if os.path.isfile(file_path):
+                    ext = os.path.splitext(file)[1].lower().replace('.', '')
+                    if ext in ['png', 'jpg', 'jpeg', 'webp']:
+                        file_name_clean = clean_string(os.path.splitext(file)[0])
+                        if file_name_clean and clean_courier and (file_name_clean in clean_courier or clean_courier in file_name_clean):
+                            try:
+                                with open(file_path, "rb") as image_file:
+                                    encoded_string = base64.b64encode(image_file.read()).decode()
+                                    mime_type = "image/png" if ext == "png" else f"image/{ext}"
+                                    return f"data:{mime_type};base64,{encoded_string}"
+                            except Exception:
+                                pass
+        except Exception:
+            continue
+                
+    return f"https://ui-avatars.com/api/?name={courier_name.replace(' ', '+')}&background=0B172E&color=F57C00&bold=true&size=80"
 
 # ==========================================
-# İŞLEME MOTORU (GÜNCELLENDİ)
+# AKILLI DOSYA OKUMA MOTORU
+# ==========================================
+def smart_read_file(uploaded_file):
+    file_bytes = uploaded_file.getvalue()
+    encodings = ['cp1254', 'iso-8859-9', 'utf-8-sig', 'utf-8', 'latin1']
+    separators = [';', ',', '\t', None]
+
+    for enc in encodings:
+        for sep in separators:
+            try:
+                engine_type = 'python' if sep is None else None
+                df = pd.read_csv(io.BytesIO(file_bytes), sep=sep, encoding=enc, engine=engine_type, on_bad_lines='skip')
+                if df is not None and len(df.columns) > 1 and len(df) > 0:
+                    return df
+            except Exception:
+                continue
+
+    try:
+        return pd.read_excel(io.BytesIO(file_bytes), engine='openpyxl')
+    except Exception:
+        pass
+
+    try:
+        return pd.read_excel(io.BytesIO(file_bytes), engine='xlrd')
+    except Exception:
+        pass
+
+    for enc in ['utf-8', 'cp1254', 'latin1']:
+        try:
+            dfs = pd.read_html(io.BytesIO(file_bytes), encoding=enc)
+            if dfs and len(dfs) > 0:
+                return dfs[0]
+        except Exception:
+            continue
+
+    raise Exception("Dosya yapısı çözümlenemedi. Lütfen dosyanın bozuk olmadığını kontrol edin.")
+
+# ==========================================
+# AT ZİMMET İZLEME TAM UYUMLU İŞLEME MOTORU
 # ==========================================
 def process_excel_data(df):
     df.columns = df.columns.astype(str).str.strip()
     req_cols = ["AT Zimmet Personel Adı", "Teslim Eden Personel"]
-    if any(col not in df.columns for col in req_cols):
-        return None, req_cols
+    missing_cols = [col for col in req_cols if col not in df.columns]
+    
+    if missing_cols:
+        return None, missing_cols
 
-    # Sadece geçerli personeli olan satırları al
-    valid_df = df[df["AT Zimmet Personel Adı"].notna() & (df["AT Zimmet Personel Adı"].astype(str).str.strip() != "")].copy()
+    df["Norm_Zimmet"] = df["AT Zimmet Personel Adı"].apply(norm_name)
+    df["Norm_Teslim"] = df["Teslim Eden Personel"].apply(norm_name)
 
-    valid_df["Norm_Zimmet"] = valid_df["AT Zimmet Personel Adı"].apply(norm_name)
-    valid_df["Norm_Teslim"] = valid_df["Teslim Eden Personel"].apply(norm_name)
+    durum_col = None
+    for c in ["Teslim Durumu", "Teslim Saati"]:
+        if c in df.columns:
+            durum_col = c
+            break
 
-    has_kanali = "Kargo Teslimat Kanalı" in valid_df.columns
-    has_aciklama = "Açıklama" in valid_df.columns
+    has_aciklama = "Açıklama" in df.columns
+    has_kanali = "Kargo Teslimat Kanalı" in df.columns
+
+    # 1. Kural: Yalnızca AT Zimmet Personel Adı sütununda adı geçen geçerli personeller
+    valid_df = df[
+        df["Norm_Zimmet"].notna() & 
+        (df["Norm_Zimmet"] != "") & 
+        (df["Norm_Zimmet"] != "NAN") & 
+        (df["Norm_Zimmet"] != "NONE")
+    ].copy()
 
     def evaluate_row(row):
+        # Durum kontrolü (Bekletiliyor / Edilmedi vb.)
+        if durum_col:
+            d_val = str(row[durum_col]).strip().upper()
+            if "BEKLETİLİYOR" in d_val or "EDİLMEDİ" in d_val or "BEKLETILIYOR" in d_val or "EDILMEDI" in d_val:
+                return "DEVİR"
+
         z = row["Norm_Zimmet"]
         t = row["Norm_Teslim"]
-        # Teslim eden kişi, zimmetli kişiyle aynı değilse DEVİR
-        if t == "" or t != z:
-            return "DEVİR", ""
         
+        # 4. Kural: Teslim Eden Personel boşsa ya da farklıysa devirdir.
+        if t == "" or t == "NAN" or t == "NONE" or t != z:
+            return "DEVİR"
+        
+        # 3. & 5. Kural: Zimmet ve Teslim Eden aynı ise kanal tespiti
         kanali = str(row["Kargo Teslimat Kanalı"]).strip().upper() if has_kanali else ""
         aciklama = str(row["Açıklama"]).strip().upper() if has_aciklama else ""
 
-        if "İMZA" in kanali or "IMZA" in kanali: return "TESLİM", "İMZA"
-        if "SMS" in kanali: return "TESLİM", "SMS"
-        if "KAPIYA" in kanali or "KS" in kanali: return "TESLİM", "KS"
-        if "POS" in aciklama or "PE" in aciklama: return "TESLİM", "KS-PE"
-        return "TESLİM", "DİĞER"
-
-    results = valid_df.apply(evaluate_row, axis=1)
-    valid_df["Durum"] = [r[0] for r in results]
-    valid_df["Kanal"] = [r[1] for r in results]
-
-    summary = []
-    for norm_p, p_df in valid_df.groupby("Norm_Zimmet"):
-        p_name = p_df["AT Zimmet Personel Adı"].iloc[0]
-        zimmet_cnt = len(p_df)
-        teslim_df = p_df[p_df["Durum"] == "TESLİM"]
+        if "İMZA" in kanali or "IMZA" in kanali:
+            return "İMZA"
+        elif "SMS" in kanali:
+            return "SMS"
+        elif "KAPIYA" in kanali or "KAPIYA BIRAKILDI" in kanali:
+            return "KS"
+        elif (kanali == "" or kanali == "NAN" or kanali == "-") and "POS ENTEGRASYON" in aciklama:
+            return "KS-PE"
         
+        # Açıklamada geçiyorsa
+        if "İMZA" in aciklama or "IMZA" in aciklama:
+            return "İMZA"
+        elif "SMS" in aciklama:
+            return "SMS"
+        elif "KAPIYA" in aciklama:
+            return "KS"
+            
+        return "TESLİM_DİĞER"
+
+    valid_df["Islem_Sonucu"] = valid_df.apply(evaluate_row, axis=1)
+
+    personnel_groups = valid_df.groupby("Norm_Zimmet")
+    
+    summary = []
+    for norm_p, p_df in personnel_groups:
+        p_name = p_df["AT Zimmet Personel Adı"].mode()[0] if not p_df["AT Zimmet Personel Adı"].mode().empty else norm_p
+        p_name = " ".join(str(p_name).split())
+        
+        # 2. Kural: Toplam Zimmet = Satır sayısı
+        zimmet_cnt = len(p_df)
+        
+        # 4. Kural: Devir (Teslim Edilemeyen) sayısı
+        devir_df = p_df[p_df["Islem_Sonucu"] == "DEVİR"]
+        teslim_edilemeyen_cnt = len(devir_df)
+        
+        # 3. Kural: Teslim Edilen sayısı (Zimmet - Devir)
+        teslim_cnt = zimmet_cnt - teslim_edilemeyen_cnt
+        if teslim_cnt < 0:
+            teslim_cnt = 0
+        
+        success_rate = round((teslim_cnt / zimmet_cnt) * 100, 1) if zimmet_cnt > 0 else 0.0
+        
+        # 5. Kural: Kanal Bazlı Dağılımlar (Yalnızca teslim edilenler üzerinden)
+        teslim_edilen_df = p_df[p_df["Islem_Sonucu"] != "DEVİR"]
+        imza_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "İMZA"])
+        sms_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "SMS"])
+        ks_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "KS"])
+        ks_pe_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "KS-PE"])
+
         summary.append({
             "Personel": p_name,
             "Zimmet": zimmet_cnt,
-            "Teslim Edilen": len(teslim_df),
-            "Teslim Edilemeyen": len(p_df[p_df["Durum"] == "DEVİR"]),
-            "Başarı Oranı": round((len(teslim_df) / zimmet_cnt) * 100, 1),
-            "İMZA": len(teslim_df[teslim_df["Kanal"] == "İMZA"]),
-            "SMS": len(teslim_df[teslim_df["Kanal"] == "SMS"]),
-            "KS": len(teslim_df[teslim_df["Kanal"] == "KS"]),
-            "KS-PE": len(teslim_df[teslim_df["Kanal"] == "KS-PE"])
+            "Teslim Edilen": teslim_cnt,
+            "Teslim Edilemeyen": teslim_edilemeyen_cnt,
+            "Başarı Oranı": success_rate,
+            "İMZA": imza_cnt,
+            "SMS": sms_cnt,
+            "KS": ks_cnt,
+            "KS-PE": ks_pe_cnt
         })
 
-    return pd.DataFrame(summary), None
-
-def smart_read_file(uploaded_file):
-    file_bytes = uploaded_file.getvalue()
-    try: return pd.read_excel(io.BytesIO(file_bytes), engine='openpyxl')
-    except: return pd.read_csv(io.BytesIO(file_bytes), sep=None, engine='python')
+    res_df = pd.DataFrame(summary)
+    if not res_df.empty:
+        res_df.index = range(1, len(res_df) + 1)
+        
+    return res_df, None
 
 # ==========================================
-# SIDEBAR VE ARAYÜZ
+# SIDEBAR VE GEZİNTİ MENÜSÜ
 # ==========================================
 with st.sidebar:
-    st.markdown("## Yurtiçi Kargo Görükle KOYS")
-    uploaded_file = st.file_uploader("📂 AT Zimmet Raporu Yükle", type=['csv', 'xlsx', 'xls'])
-    if st.button("📊 Ana Panel"): st.session_state.active_tab = "Ana Panel"
-    if st.button("🏃‍♂️ Kurye Performans"): st.session_state.active_tab = "Kurye Performans"
+    st.markdown("""
+    <div class="notranslate" style="text-align: center; padding-bottom: 10px;">
+        <h2 style="margin: 0; color: #FFFFFF;">Yurtiçi Kargo</h2>
+        <h4 style="margin: 0; color: #F57C00;">Görükle Acente KOYS</h4>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<hr style='border: 1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
+    
+    st.markdown(f"""
+    <div class="notranslate" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+        <small style="color: #F57C00;">Aktif Kullanıcı:</small><br>
+        <strong>{KULLANICI_ISIM}</strong> ({KULLANICI_GOREV})
+    </div>
+    """, unsafe_allow_html=True)
 
-if uploaded_file is not None:
-    raw_df = smart_read_file(uploaded_file)
-    perf_res, err = process_excel_data(raw_df)
-    if err: st.error(f"Eksik Sütunlar: {err}")
-    else: st.session_state.perf_df = perf_res
+    uploaded_file = st.file_uploader("📂 AT Zimmet Raporu Yükle", type=['csv', 'xlsx', 'xls', 'html'])
+    
+    st.markdown("<hr style='border: 1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
+    
+    if st.button("📊 Ana Panel"):
+        st.session_state.active_tab = "Ana Panel"
+    if st.button("🏃‍♂️ Kurye Performans"):
+        st.session_state.active_tab = "Kurye Performans"
 
 # ==========================================
-# ANA SAYFA
+# AKILLI VERİ YÖNETİMİ
+# ==========================================
+if uploaded_file is not None:
+    try:
+        raw_df = smart_read_file(uploaded_file)
+        st.session_state.raw_df = raw_df
+        
+        perf_res, err = process_excel_data(raw_df)
+        if err:
+            st.error(f"❌ Eksik Sütunlar: {err}")
+        else:
+            st.session_state.perf_df = perf_res
+    except Exception as e:
+        st.error(f"❌ Dosya Okuma/İşleme Hatası: {e}")
+
+# ==========================================
+# TAB 1: ANA PANEL
 # ==========================================
 if st.session_state.active_tab == "Ana Panel":
-    st.title("📊 Genel Performans Özeti")
-    if st.session_state.perf_df is not None:
-        perf_df = st.session_state.perf_df
+    st.title("📊 Görükle Acente - Genel Performans Özeti")
+    
+    perf_df = st.session_state.perf_df
+    if perf_df is not None and not perf_df.empty:
+        total_zimmet = perf_df["Zimmet"].sum()
+        total_teslim = perf_df["Teslim Edilen"].sum()
+        total_devir = perf_df["Teslim Edilemeyen"].sum()
+        avg_rate = round((total_teslim / total_zimmet) * 100, 1) if total_zimmet > 0 else 0
+        
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Toplam Zimmet", f"{perf_df['Zimmet'].sum():,}")
-        c2.metric("Teslim Edilen", f"{perf_df['Teslim Edilen'].sum():,}")
-        c3.metric("Teslim Edilemeyen", f"{perf_df['Teslim Edilemeyen'].sum():,}")
+        c1.metric("📦 Toplam Zimmet", f"{total_zimmet:,}")
+        c2.metric("✅ Teslim Edilen", f"{total_teslim:,}")
+        c3.metric("🚨 Devir / Teslim Edilemeyen", f"{total_devir:,}")
+        c4.metric("🎯 Genel Başarı Oranı", f"%{avg_rate}")
+        
+        st.markdown("---")
+        
+        col_left, col_right = st.columns(2)
+        
+        with col_left:
+            st.subheader("📊 Kurye Başarı Oranları (%)")
+            chart_df = perf_df.set_index("Personel")[["Başarı Oranı"]]
+            st.bar_chart(chart_df)
+            
+        with col_right:
+            st.subheader("📲 Teslimat Kanalları Dağılımı")
+            channel_df = pd.DataFrame({
+                "Kanal": ["İMZA", "SMS", "KS", "KS-PE"],
+                "Adet": [perf_df["İMZA"].sum(), perf_df["SMS"].sum(), perf_df["KS"].sum(), perf_df["KS-PE"].sum()]
+            }).set_index("Kanal")
+            st.bar_chart(channel_df)
+            
+        st.subheader("📋 Genel Performans Tablosu")
         st.dataframe(perf_df, use_container_width=True)
+        
+    else:
+        st.info("💡 Sol menüden **AT ZİMMET İZLEME** dosyanızı yükleyerek ana paneli görüntüleyebilirsiniz.")
 
+# ==========================================
+# TAB 2: KURYE PERFORMANS PANELİ
+# ==========================================
 elif st.session_state.active_tab == "Kurye Performans":
     st.title("🏃‍♂️ Kurye Performans Paneli")
-    if st.session_state.perf_df is not None:
-        perf_df = st.session_state.perf_df
-        for _, row in perf_df.iterrows():
-            with st.container():
-                st.write(f"### {row['Personel']}")
-                st.write(f"Başarı Oranı: %{row['Başarı Oranı']} | Zimmet: {row['Zimmet']}")
-                st.markdown("---")
+    
+    perf_df = st.session_state.perf_df
+    if perf_df is not None and not perf_df.empty:
+        st.success(f"✅ AT ZİMMET İZLEME raporu aktif. Toplam **{len(perf_df)}** kurye bulundu.")
+        
+        all_personnel = ["Tümü"] + sorted(perf_df["Personel"].dropna().unique().tolist())
+        selected_personnel = st.selectbox("🔍 Personel Seçerek Süzgeçle:", all_personnel)
+        
+        if selected_personnel != "Tümü":
+            filtered_perf_df = perf_df[perf_df["Personel"] == selected_personnel]
+        else:
+            filtered_perf_df = perf_df
+            
+        for idx, row in filtered_perf_df.iterrows():
+            p_name = row["Personel"]
+            zimmet = row["Zimmet"]
+            teslim = row["Teslim Edilen"]
+            devir = row["Teslim Edilemeyen"]
+            rate = row["Başarı Oranı"]
+            imza = row["İMZA"]
+            sms = row["SMS"]
+            ks = row["KS"]
+            ks_pe = row["KS-PE"]
+
+            avatar_url = get_courier_photo(p_name)
+
+            card_html = f"""
+            <div class="person-card notranslate">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+                    <div class="profile-section" style="min-width: 220px;">
+                        <img src="{avatar_url}" class="avatar-circle">
+                        <div>
+                            <div class="person-name">{p_name}</div>
+                            <small style="color: #F57C00;">Saha Kuryesi</small>
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div class="metric-title">Zimmet Sayısı</div>
+                        <div class="metric-value" style="color: #FFFFFF;">{zimmet}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div class="metric-title">Teslim Edilen</div>
+                        <div class="metric-value" style="color: #4CAF50;">{teslim}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div class="metric-title">Teslim Edilemeyen</div>
+                        <div class="metric-value" style="color: #F44336;">{devir}</div>
+                    </div>
+                    <div style="text-align: center; min-width: 80px;">
+                        <div class="metric-title">Başarı Oranı</div>
+                        <div class="metric-value" style="color: #F57C00;">%{rate}</div>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06);">
+                    <div class="channel-badge">✍️ İMZA: <span class="badge-val">{imza}</span></div>
+                    <div class="channel-badge">📲 SMS: <span class="badge-val">{sms}</span></div>
+                    <div class="channel-badge">🚪 KS: <span class="badge-val">{ks}</span></div>
+                    <div class="channel-badge">💳 KS-PE: <span class="badge-val">{ks_pe}</span></div>
+                </div>
+            </div>
+            """
+            st.markdown(card_html, unsafe_allow_html=True)
+
+    else:
+        st.warning("⚠️ Kurye performans kartlarını görmek için sol menüden **AT ZİMMET İZLEME** dosyasını yükleyin.")
