@@ -25,7 +25,7 @@ KULLANICI_ISIM = "Celal ŞENOL"
 KULLANICI_GOREV = "Şube Şefi"
 
 # ==========================================
-# CSS VE TRANSLATE KORUMA KODLARI (GÜÇLENDİRİLMİŞ TEMA)
+# CSS VE TRANSLATE KORUMA KODLARI
 # ==========================================
 custom_css = """
 <style>
@@ -356,10 +356,12 @@ with st.sidebar:
     
     st.markdown("<hr style='border: 1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
     
+    # AKTİF KULLANICI KARTI (TURUNCU RENK)
     st.markdown(f"""
-    <div class="notranslate" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
-        <small style="color: #FFB703;">Aktif Kullanıcı:</small><br>
-        <strong>{KULLANICI_ISIM}</strong> ({KULLANICI_GOREV})
+    <div class="notranslate" style="background: linear-gradient(135deg, #FF7B00 0%, #FF5400 100%); border-radius: 12px; padding: 12px; margin-bottom: 15px; border: 1px solid #FFA200; box-shadow: 0 4px 8px rgba(255,123,0,0.3);">
+        <small style="color: #FFFFFF; font-weight: 600;">Aktif Kullanıcı:</small><br>
+        <strong style="color: #FFFFFF; font-size: 15px;">{KULLANICI_ISIM}</strong><br>
+        <span style="color: #FFFFFF; font-size: 13px; font-weight: bold;">({KULLANICI_GOREV})</span>
     </div>
     """, unsafe_allow_html=True)
 
