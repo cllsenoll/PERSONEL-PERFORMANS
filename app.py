@@ -277,7 +277,7 @@ def smart_read_file(uploaded_file):
     raise Exception("Dosya yapısı çözümlenemedi. Lütfen dosyanın bozuk olmadığını kontrol edin.")
 
 # ==========================================
-# AT ZİMMET İZLEME TAM UYUMLU İŞLEME MOTORU (YENİ KURALLAR)
+# AT ZİMMET İZLEME TAM UYUMLU İŞLEME MOTORU
 # ==========================================
 def process_excel_data(df):
     df.columns = df.columns.astype(str).str.strip()
@@ -287,7 +287,7 @@ def process_excel_data(df):
     if missing_cols:
         return None, missing_cols
 
-    # 1. Kural: Yalnızca AT Zimmet Personel Adı sütununda adı geçen personeller
+    # Yalnızca AT Zimmet Personel Adı sütununda adı geçen geçerli satırlar filtrelenir
     valid_df = df[
         df["AT Zimmet Personel Adı"].notna() & 
         (df["AT Zimmet Personel Adı"].astype(str).str.strip() != "") & 
@@ -305,15 +305,14 @@ def process_excel_data(df):
         z = row["Norm_Zimmet"]
         t = row["Norm_Teslim"]
         
-        # 4. Kural: Teslim Eden Personel farklı, boş veya nan ise DEVİR (Teslim Edilemeyen)
+        # Eğer Teslim Eden Personel boş, nan veya AT Zimmet Personel Adı ile FARKLI ise -> DEVİR (Teslim Edilemeyen)
         if t == "" or t == "NAN" or t == "NONE" or t != z:
             return "DEVİR", ""
         
-        # 3. Kural: Aynı personel ise TESLİM
+        # Eğer AT Zimmet Personel Adı ile Teslim Eden Personel AYNISI -> TESLİM EDİLEN
         kanali = str(row["Kargo Teslimat Kanalı"]).strip().upper() if has_kanali else ""
         aciklama = str(row["Açıklama"]).strip().upper() if has_aciklama else ""
 
-        # 5. Kural: Kanal ve Açıklama Kontrolleri
         if "İMZA" in kanali or "IMZA" in kanali:
             return "TESLİM", "İMZA"
         elif "SMS" in kanali:
@@ -336,7 +335,7 @@ def process_excel_data(df):
         p_name = p_df["AT Zimmet Personel Adı"].mode()[0] if not p_df["AT Zimmet Personel Adı"].mode().empty else norm_p
         p_name = " ".join(str(p_name).split())
         
-        # 2. Kural: AT Zimmet Personel Adı sütununda kaç adet satırda geçiyorsa o kadar Zimmet sayısı
+        # Zimmet Sayısı: AT Zimmet Personel Adı sütununda personelin adının geçtiği toplam satır sayısı
         zimmet_cnt = len(p_df)
         
         devir_df = p_df[p_df["Durum"] == "DEVİR"]
@@ -347,7 +346,6 @@ def process_excel_data(df):
         
         success_rate = round((teslim_cnt / zimmet_cnt) * 100, 1) if zimmet_cnt > 0 else 0.0
         
-        # 5. Kural: Kanal Bazlı Dağılımlar
         imza_cnt = len(teslim_df[teslim_df["Kanal"] == "İMZA"])
         sms_cnt = len(teslim_df[teslim_df["Kanal"] == "SMS"])
         ks_cnt = len(teslim_df[teslim_df["Kanal"] == "KS"])
