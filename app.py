@@ -140,19 +140,6 @@ custom_css = """
         margin-bottom: 25px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
-    .stat-label {
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.5);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 4px;
-    }
-    .stat-number {
-        font-size: 28px;
-        font-weight: 800;
-        color: #FFB703;
-        margin-bottom: 18px;
-    }
     
     /* İlerleme Çubukları */
     .progress-container {
@@ -472,7 +459,7 @@ if st.session_state.active_tab == "Ana Panel":
                 <div style="padding: 10px 0;">
                     <div class="stat-label">En Başarılı Kurye</div>
                     <div style="font-size: 16px; font-weight: bold; color: #FFFFFF; margin-bottom: 4px;">{max_name}</div>
-                    <div class="stat-number">%{max_val}</div>
+                    <div style="font-size: 28px; font-weight: 800; color: #FFB703; margin-bottom: 18px;">%{max_val}</div>
                     <div class="stat-label">Toplam Aktif Kurye</div>
                     <div style="font-size: 20px; font-weight: 700; color: #00B4D8;">{len(perf_df)} Kişi</div>
                 </div>
@@ -498,7 +485,7 @@ if st.session_state.active_tab == "Ana Panel":
         st.markdown('</div>', unsafe_allow_html=True)
         
         # ----------------------------------------------------
-        # 2. KART: Teslimat Kanalları Dağılımı
+        # 2. KART: Teslimat Kanalları Dağılımı (Temizlenmiş Metin / Streamlit Bileşeni)
         # ----------------------------------------------------
         st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
         st.markdown("<h3 style='color: #FFB703 !important; margin-bottom: 20px;'>📲 Teslimat Kanalları Dağılımı</h3>", unsafe_allow_html=True)
@@ -520,16 +507,12 @@ if st.session_state.active_tab == "Ana Panel":
         p3 = p2 + ks_oran
         
         with chan_sol:
-            st.markdown(f"""
-                <div style="padding: 10px 0;">
-                    <div class="stat-label">En Çok Tercih Edilen</div>
-                    <div style="font-size: 18px; font-weight: bold; color: #FF6B6B; margin-bottom: 2px;">İMZA</div>
-                    <div style="font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 12px;">Yüzde: %{imza_oran}</div>
-                    
-                    <div class="stat-label">Toplam İşlem Adedi</div>
-                    <div class="stat-number" style="color: #4CAF50; font-size: 22px; margin-bottom: 0px;">{toplam_kanal:,} Adet</div>
-                </div>
-            """, unsafe_allow_html=True)
+            st.markdown('<div class="stat-label">En Çok Tercih Edilen</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size: 18px; font-weight: bold; color: #FF6B6B; margin-bottom: 2px;">İMZA</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 12px;">Yüzde: %{imza_oran}</div>', unsafe_allow_html=True)
+            
+            # Kod bozulmasına yol açan karmaşık HTML yerine doğrudan güvenli Streamlit metric bileşeni kullanıldı
+            st.metric(label="TOPLAM İŞLEM ADEDİ", value=f"{toplam_kanal:,} Adet")
             
         with chan_sag:
             donut_html = f"""
