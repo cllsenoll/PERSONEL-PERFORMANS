@@ -130,6 +130,16 @@ custom_css = """
         font-weight: 700;
         color: #FFB703 !important;
     }
+    
+    /* Modern Grafik Kartı Tasarımı */
+    .chart-card {
+        background: linear-gradient(135deg, #1E3E62 0%, #0B192C 100%);
+        border: 1px solid rgba(255, 183, 3, 0.3);
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    }
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
@@ -414,17 +424,21 @@ if st.session_state.active_tab == "Ana Panel":
         col_left, col_right = st.columns(2)
         
         with col_left:
-            st.subheader("📊 Kurye Başarı Oranları (%)")
+            st.markdown('<div class="chart-card">', unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #FFB703 !important; margin-bottom: 10px;'>📊 Kurye Başarı Oranları (%)</h4>", unsafe_allow_html=True)
             chart_df = perf_df.set_index("Personel")[["Başarı Oranı"]]
             st.bar_chart(chart_df)
+            st.markdown('</div>', unsafe_allow_html=True)
             
         with col_right:
-            st.subheader("📲 Teslimat Kanalları Dağılımı")
+            st.markdown('<div class="chart-card">', unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #FFB703 !important; margin-bottom: 10px;'>📲 Teslimat Kanalları Dağılımı</h4>", unsafe_allow_html=True)
             channel_df = pd.DataFrame({
                 "Kanal": ["İMZA", "SMS", "KS", "KS-PE"],
                 "Adet": [perf_df["İMZA"].sum(), perf_df["SMS"].sum(), perf_df["KS"].sum(), perf_df["KS-PE"].sum()]
             }).set_index("Kanal")
             st.bar_chart(channel_df)
+            st.markdown('</div>', unsafe_allow_html=True)
             
         st.subheader("📋 Genel Performans Tablosu")
         st.dataframe(perf_df, use_container_width=True)
