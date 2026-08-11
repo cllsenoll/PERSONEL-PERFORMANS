@@ -170,11 +170,6 @@ custom_css = """
         margin-top: 6px;
         overflow: hidden;
     }
-    .progress-bar-fill-blue {
-        background: linear-gradient(90deg, #0077B6 0%, #00B4D8 100%);
-        height: 100%;
-        border-radius: 6px;
-    }
     .progress-bar-fill-orange {
         background: linear-gradient(90deg, #FB8500 0%, #FFB703 100%);
         height: 100%;
@@ -532,7 +527,7 @@ if st.session_state.active_tab == "Ana Panel":
                     <div style="font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 12px;">Yüzde: %{imza_oran}</div>
                     
                     <div class="stat-label">Toplam İşlem Adedi</div>
-                    <div class="stat-number" style="color: #4CAF50; font-size: 22px;">{toplam_kanal:,} Adet</div>
+                    <div class="stat-number" style="color: #4CAF50; font-size: 22px; margin-bottom: 0px;">{toplam_kanal:,} Adet</div>
                 </div>
             """, unsafe_allow_html=True)
             
