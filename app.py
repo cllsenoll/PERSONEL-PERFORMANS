@@ -4,6 +4,7 @@ import io
 import os
 import base64
 import re
+import plotly.express as px
 
 # 1. SAYFA YAPILANDIRMASI
 st.set_page_config(
@@ -415,16 +416,55 @@ if st.session_state.active_tab == "Ana Panel":
         
         with col_left:
             st.subheader("📊 Kurye Başarı Oranları (%)")
-            chart_df = perf_df.set_index("Personel")[["Başarı Oranı"]]
-            st.bar_chart(chart_df)
+            # Modern Plotly Grafiği
+            fig_perf = px.bar(
+                perf_df, 
+                x="Personel", 
+                y="Başarı Oranı", 
+                text="Başarı Oranı",
+                color="Başarı Oranı",
+                color_continuous_scale=["#00B4D8", "#0077B6", "#FFB703"]
+            )
+            fig_perf.update_traces(texttemplate='%{text:.1f}%', textposition='outside', marker_line_width=0, opacity=0.9)
+            fig_perf.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                xaxis=dict(showgrid=False, title=''),
+                yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)', title='Başarı (%)'),
+                margin=dict(l=10, r=10, t=10, b=10),
+                height=350,
+                coloraxis_showscale=False
+            )
+            st.plotly_chart(fig_perf, use_container_width=True)
             
         with col_right:
             st.subheader("📲 Teslimat Kanalları Dağılımı")
             channel_df = pd.DataFrame({
                 "Kanal": ["İMZA", "SMS", "KS", "KS-PE"],
                 "Adet": [perf_df["İMZA"].sum(), perf_df["SMS"].sum(), perf_df["KS"].sum(), perf_df["KS-PE"].sum()]
-            }).set_index("Kanal")
-            st.bar_chart(channel_df)
+            })
+            # Modern Plotly Grafiği
+            fig_chan = px.bar(
+                channel_df, 
+                x="Kanal", 
+                y="Adet", 
+                text="Adet",
+                color="Adet",
+                color_continuous_scale=["#FFB703", "#FB8500", "#00B4D8"]
+            )
+            fig_chan.update_traces(texttemplate='%{text}', textposition='outside', marker_line_width=0, opacity=0.9)
+            fig_chan.update_layout(
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                xaxis=dict(showgrid=False, title=''),
+                yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.1)', title='Adet'),
+                margin=dict(l=10, r=10, t=10, b=10),
+                height=350,
+                coloraxis_showscale=False
+            )
+            st.plotly_chart(fig_chan, use_container_width=True)
             
         st.subheader("📋 Genel Performans Tablosu")
         st.dataframe(perf_df, use_container_width=True)
