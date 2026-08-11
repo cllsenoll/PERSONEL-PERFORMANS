@@ -131,7 +131,7 @@ custom_css = """
         color: #FFB703 !important;
     }
     
-    /* Örnek Tasarıma Benzer Modern Dashboard Kartları */
+    /* Dashboard Kartları */
     .dashboard-card {
         background: linear-gradient(135deg, #162A45 0%, #0B192C 100%);
         border: 1px solid rgba(255, 183, 3, 0.3);
@@ -154,7 +154,7 @@ custom_css = """
         margin-bottom: 18px;
     }
     
-    /* Özel Modern İlerleme Çubukları */
+    /* İlerleme Çubukları */
     .progress-container {
         background: rgba(255, 255, 255, 0.07);
         border-radius: 8px;
@@ -462,7 +462,7 @@ if st.session_state.active_tab == "Ana Panel":
         st.markdown("---")
         
         # ----------------------------------------------------
-        # 1. KART: Kurye Başarı Oranları (Örnek Görsel Tarzında)
+        # 1. KART: Kurye Başarı Oranları
         # ----------------------------------------------------
         st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
         st.markdown("<h3 style='color: #FFB703 !important; margin-bottom: 20px;'>📊 Kurye Başarı Oranları (%)</h3>", unsafe_allow_html=True)
@@ -484,7 +484,6 @@ if st.session_state.active_tab == "Ana Panel":
             """, unsafe_allow_html=True)
             
         with c_sag:
-            # Görseldeki modern çubuk yapısını simüle eden özel şık HTML barlar
             bars_html = ""
             for _, r in perf_df.iterrows():
                 p_adi = r["Personel"]
@@ -504,7 +503,7 @@ if st.session_state.active_tab == "Ana Panel":
         st.markdown('</div>', unsafe_allow_html=True)
         
         # ----------------------------------------------------
-        # 2. KART: Teslimat Kanalları Dağılımı (Örnek Görsel Tarzında)
+        # 2. KART: Teslimat Kanalları Dağılımı (Örnek Görseldeki Halka/Donut Grafik Tarzı)
         # ----------------------------------------------------
         st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
         st.markdown("<h3 style='color: #FFB703 !important; margin-bottom: 20px;'>📲 Teslimat Kanalları Dağılımı</h3>", unsafe_allow_html=True)
@@ -518,38 +517,62 @@ if st.session_state.active_tab == "Ana Panel":
         
         imza_oran = round((imza_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0
         sms_oran = round((sms_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0
+        ks_oran = round((ks_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0
+        kspe_oran = round((kspe_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0
+        
+        # SVG Donut Dilim Hesaplamaları (Toplam 363 derece / stroke-dasharray mantığı)
+        # 100 üzerinden kümülatif yüzdeler
+        p1 = imza_oran
+        p2 = p1 + sms_oran
+        p3 = p2 + ks_oran
         
         with chan_sol:
             st.markdown(f"""
                 <div style="padding: 10px 0;">
-                    <div class="stat-label">Toplam İşlem Hacmi</div>
-                    <div class="stat-number" style="color: #4CAF50;">{toplam_kanal:,} Adet</div>
                     <div class="stat-label">En Çok Tercih Edilen</div>
-                    <div style="font-size: 16px; font-weight: bold; color: #00B4D8;">İMZA (%{imza_oran})</div>
+                    <div style="font-size: 18px; font-weight: bold; color: #FF6B6B; margin-bottom: 2px;">İMZA</div>
+                    <div style="font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 12px;">Yüzde: %{imza_oran}</div>
+                    
+                    <div class="stat-label">Toplam İşlem Adedi</div>
+                    <div class="stat-number" style="color: #4CAF50; font-size: 22px;">{toplam_kanal:,} Adet</div>
                 </div>
             """, unsafe_allow_html=True)
             
         with chan_sag:
-            channels = [
-                ("İMZA", imza_t, imza_oran),
-                ("SMS", sms_t, sms_oran),
-                ("KS (Kapıya Bırakıldı)", ks_t, round((ks_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0),
-                ("KS-PE (Pos Entegrasyon)", kspe_t, round((kspe_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0)
-            ]
-            chan_bars_html = ""
-            for kanal_adi, adet, oran in channels:
-                chan_bars_html += f"""
-                <div class="progress-container">
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600;">
-                        <span>{kanal_adi}</span>
-                        <span style="color: #00B4D8;">{adet} Adet (%{oran})</span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill-blue" style="width: {min(oran, 100)}%;"></div>
+            # Örnek görseldeki gibi şık halka (donut) grafiği SVG ile çiziyoruz
+            donut_html = f"""
+            <div style="display: flex; align-items: center; justify-content: center; gap: 30px; flex-wrap: wrap;">
+                <div style="position: relative; width: 150px; height: 150px;">
+                    <svg width="150" height="150" viewBox="0 0 42 42" style="transform: rotate(-90deg);">
+                        <!-- Arka plan çemberi -->
+                        <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="rgba(255,255,255,0.1)" stroke-width="5"></circle>
+                        <!-- Dilim 1: İMZA (Kırmızımsı/Pembe) -->
+                        <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#FF6B6B" stroke-width="5" 
+                                stroke-dasharray="{p1} {100 - p1}" stroke-dashoffset="0"></circle>
+                        <!-- Dilim 2: SMS (Mavi) -->
+                        <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#4EA8DE" stroke-width="5" 
+                                stroke-dasharray="{sms_oran} {100 - sms_oran}" stroke-dashoffset="-{p1}"></circle>
+                        <!-- Dilim 3: KS (Sarı) -->
+                        <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#FFB703" stroke-width="5" 
+                                stroke-dasharray="{ks_oran} {100 - ks_oran}" stroke-dashoffset="-{p2}"></circle>
+                        <!-- Dilim 4: KS-PE (Yeşil) -->
+                        <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#4CAF50" stroke-width="5" 
+                                stroke-dasharray="{kspe_oran} {100 - kspe_oran}" stroke-dashoffset="-{p3}"></circle>
+                    </svg>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                        <span style="font-size: 12px; color: rgba(255,255,255,0.5); display: block;">Kanal</span>
+                        <strong style="font-size: 14px; color: #FFFFFF;">Dağılımı</strong>
                     </div>
                 </div>
-                """
-            st.markdown(chan_bars_html, unsafe_allow_html=True)
+                <div style="flex-grow: 1; min-width: 180px;">
+                    <div style="margin-bottom: 6px; font-size: 13px;"><span style="display:inline-block; width:10px; height:10px; background:#FF6B6B; border-radius:50%; margin-right:6px;"></span> <b>İMZA:</b> %{imza_oran} ({imza_t})</div>
+                    <div style="margin-bottom: 6px; font-size: 13px;"><span style="display:inline-block; width:10px; height:10px; background:#4EA8DE; border-radius:50%; margin-right:6px;"></span> <b>SMS:</b> %{sms_oran} ({sms_t})</div>
+                    <div style="margin-bottom: 6px; font-size: 13px;"><span style="display:inline-block; width:10px; height:10px; background:#FFB703; border-radius:50%; margin-right:6px;"></span> <b>KS:</b> %{ks_oran} ({ks_t})</div>
+                    <div style="font-size: 13px;"><span style="display:inline-block; width:10px; height:10px; background:#4CAF50; border-radius:50%; margin-right:6px;"></span> <b>KS-PE:</b> %{kspe_oran} ({kspe_t})</div>
+                </div>
+            </div>
+            """
+            st.markdown(donut_html, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
             
         st.subheader("📋 Genel Performans Tablosu")
