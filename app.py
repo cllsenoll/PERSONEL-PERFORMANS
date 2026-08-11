@@ -25,7 +25,7 @@ KULLANICI_ISIM = "Celal ŞENOL"
 KULLANICI_GOREV = "Şube Şefi"
 
 # ==========================================
-# CSS VE TRANSLATE KORUMA KODLARI
+# CSS VE MODERN GÖRSEL BİLEŞEN TASARIMLARI
 # ==========================================
 custom_css = """
 <style>
@@ -33,15 +33,15 @@ custom_css = """
         translate: no !important;
     }
     .stApp {
-        background-color: #070E1E;
-        color: #FFFFFF;
+        background-color: #0B192C !important;
+        color: #FFFFFF !important;
     }
     h1, h2, h3, h4, h5, h6, p, span, label {
         color: #FFFFFF !important;
         font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
     [data-testid="stSidebar"] {
-        background-color: #0B172E !important;
+        background-color: #1E3E62 !important;
         border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
     [data-testid="stSidebar"] div.stButton > button {
@@ -49,20 +49,39 @@ custom_css = """
         height: 48px !important;
         border-radius: 10px !important;
         font-weight: 600 !important;
-        background: linear-gradient(135deg, #0A58CA 0%, #032057 100%) !important;
+        background: linear-gradient(135deg, #00B4D8 0%, #0077B6 100%) !important;
         color: #FFFFFF !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        margin-bottom: 6px !important;
+        border: 1px solid #90E0EF !important;
+        box-shadow: 0 6px 0 #03045E, 0 8px 10px rgba(0, 0, 0, 0.4) !important;
+        margin-bottom: 10px !important;
         text-align: left !important;
         padding-left: 15px !important;
     }
     [data-testid="stSidebar"] div.stButton > button:hover {
-        background: linear-gradient(135deg, #0D6EFD 0%, #0A58CA 100%) !important;
-        border-color: #F57C00 !important;
+        background: linear-gradient(135deg, #48CAE4 0%, #00B4D8 100%) !important;
     }
+    
+    /* "AT Zimmet Raporu Yükle" Alanı Sarı Tasarım */
+    [data-testid="stFileUploader"] section {
+        background: linear-gradient(135deg, #FFD166 0%, #FFB703) !important;
+        border: 2px dashed #FB8500 !important;
+        border-radius: 12px !important;
+    }
+    [data-testid="stFileUploader"] section * {
+        color: #000000 !important;
+    }
+    [data-testid="stFileUploader"] button {
+        background: linear-gradient(135deg, #FFB703 0%, #FB8500) !important;
+        color: #FFFFFF !important;
+        border: 1px solid #FFFFFF !important;
+        font-weight: bold !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 0 #9E2A2B, 0 6px 8px rgba(0,0,0,0.3) !important;
+    }
+
     .person-card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 14px;
         padding: 16px 20px;
         margin-bottom: 14px;
@@ -77,9 +96,9 @@ custom_css = """
         width: 62px;
         height: 62px;
         border-radius: 50%;
-        border: 2px solid #F57C00;
+        border: 2px solid #FFB703;
         object-fit: cover;
-        background-color: #0B172E;
+        background-color: #1E3E62;
     }
     .person-name {
         font-size: 15px;
@@ -88,7 +107,7 @@ custom_css = """
     }
     .metric-title {
         font-size: 11px;
-        color: rgba(255, 255, 255, 0.5) !important;
+        color: rgba(255, 255, 255, 0.6) !important;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         margin-bottom: 2px;
@@ -98,8 +117,8 @@ custom_css = """
         font-weight: 700;
     }
     .channel-badge {
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 6px;
         padding: 4px 10px;
         font-size: 12px;
@@ -109,14 +128,53 @@ custom_css = """
     }
     .badge-val {
         font-weight: 700;
-        color: #F57C00 !important;
+        color: #FFB703 !important;
+    }
+    
+    /* Dashboard Kartları */
+    .dashboard-card {
+        background: linear-gradient(135deg, #162A45 0%, #0B192C 100%);
+        border: 1px solid rgba(255, 183, 3, 0.3);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    .stat-label {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+    }
+    
+    /* İlerleme Çubukları */
+    .progress-container {
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 8px;
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .progress-bar-bg {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        height: 10px;
+        width: 100%;
+        margin-top: 6px;
+        overflow: hidden;
+    }
+    .progress-bar-fill-orange {
+        background: linear-gradient(90deg, #FB8500 0%, #FFB703 100%);
+        height: 100%;
+        border-radius: 6px;
     }
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # ==========================================
-# İSİM TEMİZLEME VE NORMALİZASYON
+# İSİM TEMİZLEME VE NORMALİZASYON (GELİŞTİRİLMİŞ)
 # ==========================================
 def clean_string(text):
     if pd.isna(text) or not text:
@@ -131,7 +189,11 @@ def clean_string(text):
 def norm_name(val):
     if pd.isna(val) or not val:
         return ""
-    return " ".join(str(val).upper().split())
+    # Türkçe karakter duyarlı ve fazla boşlukları temizleyen hassas normalizasyon
+    val_str = str(val).strip()
+    if val_str.upper() in ["NAN", "NONE", "-", ""]:
+        return ""
+    return " ".join(val_str.upper().split())
 
 # ==========================================
 # OTOMATİK KURYE FOTOĞRAFI ALMA
@@ -178,7 +240,7 @@ def get_courier_photo(courier_name):
         except Exception:
             continue
                 
-    return f"https://ui-avatars.com/api/?name={courier_name.replace(' ', '+')}&background=0B172E&color=F57C00&bold=true&size=80"
+    return f"https://ui-avatars.com/api/?name={courier_name.replace(' ', '+')}&background=1E3E62&color=FFB703&bold=true&size=80"
 
 # ==========================================
 # AKILLI DOSYA OKUMA MOTORU
@@ -219,7 +281,7 @@ def smart_read_file(uploaded_file):
     raise Exception("Dosya yapısı çözümlenemedi. Lütfen dosyanın bozuk olmadığını kontrol edin.")
 
 # ==========================================
-# AT ZİMMET İZLEME TAM UYUMLU İŞLEME MOTORU
+# AT ZİMMET İZLEME TAM UYUMLU İŞLEME MOTORU (HASSAS EŞLEŞTİRME)
 # ==========================================
 def process_excel_data(df):
     df.columns = df.columns.astype(str).str.strip()
@@ -229,64 +291,47 @@ def process_excel_data(df):
     if missing_cols:
         return None, missing_cols
 
-    df["Norm_Zimmet"] = df["AT Zimmet Personel Adı"].apply(norm_name)
-    df["Norm_Teslim"] = df["Teslim Eden Personel"].apply(norm_name)
-
-    durum_col = None
-    for c in ["Teslim Durumu", "Teslim Saati"]:
-        if c in df.columns:
-            durum_col = c
-            break
-
-    has_aciklama = "Açıklama" in df.columns
-    has_kanali = "Kargo Teslimat Kanalı" in df.columns
-
-    # 1. Kural: Yalnızca AT Zimmet Personel Adı sütununda adı geçen geçerli personeller
+    # 1. Yalnızca AT Zimmet Personel Adı sütununda adı geçen geçerli satırlar filtrelenir
     valid_df = df[
-        df["Norm_Zimmet"].notna() & 
-        (df["Norm_Zimmet"] != "") & 
-        (df["Norm_Zimmet"] != "NAN") & 
-        (df["Norm_Zimmet"] != "NONE")
+        df["AT Zimmet Personel Adı"].notna() & 
+        (df["AT Zimmet Personel Adı"].astype(str).str.strip() != "") & 
+        (df["AT Zimmet Personel Adı"].astype(str).str.strip().str.upper() != "NAN") & 
+        (df["AT Zimmet Personel Adı"].astype(str).str.strip().str.upper() != "NONE")
     ].copy()
 
-    def evaluate_row(row):
-        # Durum kontrolü (Bekletiliyor / Edilmedi vb.)
-        if durum_col:
-            d_val = str(row[durum_col]).strip().upper()
-            if "BEKLETİLİYOR" in d_val or "EDİLMEDİ" in d_val or "BEKLETILIYOR" in d_val or "EDILMEDI" in d_val:
-                return "DEVİR"
+    valid_df["Norm_Zimmet"] = valid_df["AT Zimmet Personel Adı"].apply(norm_name)
+    valid_df["Norm_Teslim"] = valid_df["Teslim Eden Personel"].apply(norm_name)
 
+    has_kanali = "Kargo Teslimat Kanalı" in valid_df.columns
+    has_aciklama = "Açıklama" in valid_df.columns
+
+    def evaluate_row(row):
         z = row["Norm_Zimmet"]
         t = row["Norm_Teslim"]
         
-        # 4. Kural: Teslim Eden Personel boşsa ya da farklıysa devirdir.
-        if t == "" or t == "NAN" or t == "NONE" or t != z:
-            return "DEVİR"
+        # 4. Kural: Teslim Eden Personel boş, nan veya AT Zimmet Personel Adı ile FARKLI ise -> DEVİR
+        if t == "" or t != z:
+            return "DEVİR", ""
         
-        # 3. & 5. Kural: Zimmet ve Teslim Eden aynı ise kanal tespiti
+        # 3. Kural: Aynı personel ise -> TESLİM
         kanali = str(row["Kargo Teslimat Kanalı"]).strip().upper() if has_kanali else ""
         aciklama = str(row["Açıklama"]).strip().upper() if has_aciklama else ""
 
+        # 5. Kural: Kanal ve Açıklama Kontrolleri
         if "İMZA" in kanali or "IMZA" in kanali:
-            return "İMZA"
+            return "TESLİM", "İMZA"
         elif "SMS" in kanali:
-            return "SMS"
-        elif "KAPIYA" in kanali or "KAPIYA BIRAKILDI" in kanali:
-            return "KS"
+            return "TESLİM", "SMS"
+        elif "KAPIYA BIRAKILDI" in kanali or "KAPIYA" in kanali:
+            return "TESLİM", "KS"
         elif (kanali == "" or kanali == "NAN" or kanali == "-") and "POS ENTEGRASYON" in aciklama:
-            return "KS-PE"
+            return "TESLİM", "KS-PE"
         
-        # Açıklamada geçiyorsa
-        if "İMZA" in aciklama or "IMZA" in aciklama:
-            return "İMZA"
-        elif "SMS" in aciklama:
-            return "SMS"
-        elif "KAPIYA" in aciklama:
-            return "KS"
-            
-        return "TESLİM_DİĞER"
+        return "TESLİM", "DİĞER"
 
-    valid_df["Islem_Sonucu"] = valid_df.apply(evaluate_row, axis=1)
+    results = valid_df.apply(evaluate_row, axis=1)
+    valid_df["Durum"] = [r[0] for r in results]
+    valid_df["Kanal"] = [r[1] for r in results]
 
     personnel_groups = valid_df.groupby("Norm_Zimmet")
     
@@ -295,26 +340,21 @@ def process_excel_data(df):
         p_name = p_df["AT Zimmet Personel Adı"].mode()[0] if not p_df["AT Zimmet Personel Adı"].mode().empty else norm_p
         p_name = " ".join(str(p_name).split())
         
-        # 2. Kural: Toplam Zimmet = Satır sayısı
+        # 2. Kural: AT Zimmet Personel Adı sütununda personelin adı kaç satırda geçiyorsa zimmet sayısı odur
         zimmet_cnt = len(p_df)
         
-        # 4. Kural: Devir (Teslim Edilemeyen) sayısı
-        devir_df = p_df[p_df["Islem_Sonucu"] == "DEVİR"]
+        devir_df = p_df[p_df["Durum"] == "DEVİR"]
         teslim_edilemeyen_cnt = len(devir_df)
         
-        # 3. Kural: Teslim Edilen sayısı (Zimmet - Devir)
-        teslim_cnt = zimmet_cnt - teslim_edilemeyen_cnt
-        if teslim_cnt < 0:
-            teslim_cnt = 0
+        teslim_df = p_df[p_df["Durum"] == "TESLİM"]
+        teslim_cnt = len(teslim_df)
         
         success_rate = round((teslim_cnt / zimmet_cnt) * 100, 1) if zimmet_cnt > 0 else 0.0
         
-        # 5. Kural: Kanal Bazlı Dağılımlar (Yalnızca teslim edilenler üzerinden)
-        teslim_edilen_df = p_df[p_df["Islem_Sonucu"] != "DEVİR"]
-        imza_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "İMZA"])
-        sms_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "SMS"])
-        ks_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "KS"])
-        ks_pe_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "KS-PE"])
+        imza_cnt = len(teslim_df[teslim_df["Kanal"] == "İMZA"])
+        sms_cnt = len(teslim_df[teslim_df["Kanal"] == "SMS"])
+        ks_cnt = len(teslim_df[teslim_df["Kanal"] == "KS"])
+        ks_pe_cnt = len(teslim_df[teslim_df["Kanal"] == "KS-PE"])
 
         summary.append({
             "Personel": p_name,
@@ -341,16 +381,18 @@ with st.sidebar:
     st.markdown("""
     <div class="notranslate" style="text-align: center; padding-bottom: 10px;">
         <h2 style="margin: 0; color: #FFFFFF;">Yurtiçi Kargo</h2>
-        <h4 style="margin: 0; color: #F57C00;">Görükle Acente KOYS</h4>
+        <h4 style="margin: 0; color: #00B4D8;">Görükle Acente KOYS</h4>
     </div>
     """, unsafe_allow_html=True)
     
     st.markdown("<hr style='border: 1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
     
+    # AKTİF KULLANICI KARTI (TURUNCU RENK VE CELAL ŞENOL / ŞUBE ŞEFİ)
     st.markdown(f"""
-    <div class="notranslate" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
-        <small style="color: #F57C00;">Aktif Kullanıcı:</small><br>
-        <strong>{KULLANICI_ISIM}</strong> ({KULLANICI_GOREV})
+    <div class="notranslate" style="background: linear-gradient(135deg, #FF7B00 0%, #FF5400 100%); border-radius: 12px; padding: 12px; margin-bottom: 15px; border: 1px solid #FFA200; box-shadow: 0 4px 8px rgba(255,123,0,0.3);">
+        <small style="color: #FFFFFF; font-weight: 600;">Aktif Kullanıcı:</small><br>
+        <strong style="color: #FFFFFF; font-size: 15px;">{KULLANICI_ISIM}</strong><br>
+        <span style="color: #FFFFFF; font-size: 13px; font-weight: bold;">({KULLANICI_GOREV})</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -400,20 +442,106 @@ if st.session_state.active_tab == "Ana Panel":
         
         st.markdown("---")
         
-        col_left, col_right = st.columns(2)
+        # ----------------------------------------------------
+        # 1. KART: Kurye Başarı Oranları
+        # ----------------------------------------------------
+        st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #FFB703 !important; margin-bottom: 20px;'>📊 Kurye Başarı Oranları (%)</h3>", unsafe_allow_html=True)
         
-        with col_left:
-            st.subheader("📊 Kurye Başarı Oranları (%)")
-            chart_df = perf_df.set_index("Personel")[["Başarı Oranı"]]
-            st.bar_chart(chart_df)
+        c_sol, c_sag = st.columns([1, 2])
+        with c_sol:
+            max_p = perf_df.loc[perf_df['Başarı Oranı'].idxmax()] if not perf_df.empty else None
+            max_name = max_p['Personel'] if max_p is not None else "-"
+            max_val = max_p['Başarı Oranı'] if max_p is not None else 0
             
-        with col_right:
-            st.subheader("📲 Teslimat Kanalları Dağılımı")
-            channel_df = pd.DataFrame({
-                "Kanal": ["İMZA", "SMS", "KS", "KS-PE"],
-                "Adet": [perf_df["İMZA"].sum(), perf_df["SMS"].sum(), perf_df["KS"].sum(), perf_df["KS-PE"].sum()]
-            }).set_index("Kanal")
-            st.bar_chart(channel_df)
+            st.markdown(f"""
+                <div style="padding: 10px 0;">
+                    <div class="stat-label">En Başarılı Kurye</div>
+                    <div style="font-size: 16px; font-weight: bold; color: #FFFFFF; margin-bottom: 4px;">{max_name}</div>
+                    <div style="font-size: 28px; font-weight: 800; color: #FFB703; margin-bottom: 18px;">%{max_val}</div>
+                    <div class="stat-label">Toplam Aktif Kurye</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #00B4D8;">{len(perf_df)} Kişi</div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+        with c_sag:
+            bars_html = ""
+            for _, r in perf_df.iterrows():
+                p_adi = r["Personel"]
+                p_oran = r["Başarı Oranı"]
+                bars_html += f"""
+                <div class="progress-container">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600;">
+                        <span>{p_adi}</span>
+                        <span style="color: #FFB703;">%{p_oran}</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill-orange" style="width: {min(p_oran, 100)}%;"></div>
+                    </div>
+                </div>
+                """
+            st.markdown(bars_html, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # ----------------------------------------------------
+        # 2. KART: Teslimat Kanalları Dağılımı
+        # ----------------------------------------------------
+        st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #FFB703 !important; margin-bottom: 20px;'>📲 Teslimat Kanalları Dağılımı</h3>", unsafe_allow_html=True)
+        
+        chan_sol, chan_sag = st.columns([1, 2])
+        imza_t = perf_df["İMZA"].sum()
+        sms_t = perf_df["SMS"].sum()
+        ks_t = perf_df["KS"].sum()
+        kspe_t = perf_df["KS-PE"].sum()
+        toplam_kanal = imza_t + sms_t + ks_t + kspe_t
+        
+        imza_oran = round((imza_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0
+        sms_oran = round((sms_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0
+        ks_oran = round((ks_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0
+        kspe_oran = round((kspe_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0
+        
+        p1 = imza_oran
+        p2 = p1 + sms_oran
+        p3 = p2 + ks_oran
+        
+        with chan_sol:
+            st.markdown('<div class="stat-label">En Çok Tercih Edilen</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size: 18px; font-weight: bold; color: #FF6B6B; margin-bottom: 2px;">İMZA</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 12px;">Yüzde: %{imza_oran}</div>', unsafe_allow_html=True)
+            
+            st.metric(label="TOPLAM İŞLEM ADEDİ", value=f"{toplam_kanal:,} Adet")
+            
+        with chan_sag:
+            donut_html = f"""
+            <div style="display: flex; align-items: center; justify-content: center; gap: 30px; flex-wrap: wrap;">
+                <div style="position: relative; width: 150px; height: 150px;">
+                    <svg width="150" height="150" viewBox="0 0 42 42" style="transform: rotate(-90deg);">
+                        <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="rgba(255,255,255,0.1)" stroke-width="5"></circle>
+                        <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#FF6B6B" stroke-width="5" 
+                                stroke-dasharray="{p1} {100 - p1}" stroke-dashoffset="0"></circle>
+                        <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#4EA8DE" stroke-width="5" 
+                                stroke-dasharray="{sms_oran} {100 - sms_oran}" stroke-dashoffset="-{p1}"></circle>
+                        <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#FFB703" stroke-width="5" 
+                                stroke-dasharray="{ks_oran} {100 - ks_oran}" stroke-dashoffset="-{p2}"></circle>
+                        <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#4CAF50" stroke-width="5" 
+                                stroke-dasharray="{kspe_oran} {100 - kspe_oran}" stroke-dashoffset="-{p3}"></circle>
+                    </svg>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                        <span style="font-size: 12px; color: rgba(255,255,255,0.5); display: block;">Kanal</span>
+                        <strong style="font-size: 14px; color: #FFFFFF;">Dağılımı</strong>
+                    </div>
+                </div>
+                <div style="flex-grow: 1; min-width: 180px;">
+                    <div style="margin-bottom: 6px; font-size: 13px;"><span style="display:inline-block; width:10px; height:10px; background:#FF6B6B; border-radius:50%; margin-right:6px;"></span> <b>İMZA:</b> %{imza_oran} ({imza_t})</div>
+                    <div style="margin-bottom: 6px; font-size: 13px;"><span style="display:inline-block; width:10px; height:10px; background:#4EA8DE; border-radius:50%; margin-right:6px;"></span> <b>SMS:</b> %{sms_oran} ({sms_t})</div>
+                    <div style="margin-bottom: 6px; font-size: 13px;"><span style="display:inline-block; width:10px; height:10px; background:#FFB703; border-radius:50%; margin-right:6px;"></span> <b>KS:</b> %{ks_oran} ({ks_t})</div>
+                    <div style="font-size: 13px;"><span style="display:inline-block; width:10px; height:10px; background:#4CAF50; border-radius:50%; margin-right:6px;"></span> <b>KS-PE:</b> %{kspe_oran} ({kspe_t})</div>
+                </div>
+            </div>
+            """
+            st.markdown(donut_html, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
             
         st.subheader("📋 Genel Performans Tablosu")
         st.dataframe(perf_df, use_container_width=True)
@@ -459,7 +587,7 @@ elif st.session_state.active_tab == "Kurye Performans":
                         <img src="{avatar_url}" class="avatar-circle">
                         <div>
                             <div class="person-name">{p_name}</div>
-                            <small style="color: #F57C00;">Saha Kuryesi</small>
+                            <small style="color: #FFB703;">Saha Kuryesi</small>
                         </div>
                     </div>
                     <div style="text-align: center;">
@@ -476,7 +604,7 @@ elif st.session_state.active_tab == "Kurye Performans":
                     </div>
                     <div style="text-align: center; min-width: 80px;">
                         <div class="metric-title">Başarı Oranı</div>
-                        <div class="metric-value" style="color: #F57C00;">%{rate}</div>
+                        <div class="metric-value" style="color: #FFB703;">%{rate}</div>
                     </div>
                 </div>
                 <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06);">
