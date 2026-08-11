@@ -406,7 +406,7 @@ with st.sidebar:
     
     st.markdown("<hr style='border: 1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
     
-    # AKTİF KULLANICI KARTI (TURUNCU RENK)
+    # AKTİF KULLANICI KARTI (TURUNCU RENK VE CELAL ŞENOL / ŞUBE ŞEFİ)
     st.markdown(f"""
     <div class="notranslate" style="background: linear-gradient(135deg, #FF7B00 0%, #FF5400 100%); border-radius: 12px; padding: 12px; margin-bottom: 15px; border: 1px solid #FFA200; box-shadow: 0 4px 8px rgba(255,123,0,0.3);">
         <small style="color: #FFFFFF; font-weight: 600;">Aktif Kullanıcı:</small><br>
@@ -503,7 +503,7 @@ if st.session_state.active_tab == "Ana Panel":
         st.markdown('</div>', unsafe_allow_html=True)
         
         # ----------------------------------------------------
-        # 2. KART: Teslimat Kanalları Dağılımı (Örnek Görseldeki Halka/Donut Grafik Tarzı)
+        # 2. KART: Teslimat Kanalları Dağılımı
         # ----------------------------------------------------
         st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
         st.markdown("<h3 style='color: #FFB703 !important; margin-bottom: 20px;'>📲 Teslimat Kanalları Dağılımı</h3>", unsafe_allow_html=True)
@@ -520,8 +520,6 @@ if st.session_state.active_tab == "Ana Panel":
         ks_oran = round((ks_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0
         kspe_oran = round((kspe_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0
         
-        # SVG Donut Dilim Hesaplamaları (Toplam 363 derece / stroke-dasharray mantığı)
-        # 100 üzerinden kümülatif yüzdeler
         p1 = imza_oran
         p2 = p1 + sms_oran
         p3 = p2 + ks_oran
@@ -539,23 +537,17 @@ if st.session_state.active_tab == "Ana Panel":
             """, unsafe_allow_html=True)
             
         with chan_sag:
-            # Örnek görseldeki gibi şık halka (donut) grafiği SVG ile çiziyoruz
             donut_html = f"""
             <div style="display: flex; align-items: center; justify-content: center; gap: 30px; flex-wrap: wrap;">
                 <div style="position: relative; width: 150px; height: 150px;">
                     <svg width="150" height="150" viewBox="0 0 42 42" style="transform: rotate(-90deg);">
-                        <!-- Arka plan çemberi -->
                         <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="rgba(255,255,255,0.1)" stroke-width="5"></circle>
-                        <!-- Dilim 1: İMZA (Kırmızımsı/Pembe) -->
                         <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#FF6B6B" stroke-width="5" 
                                 stroke-dasharray="{p1} {100 - p1}" stroke-dashoffset="0"></circle>
-                        <!-- Dilim 2: SMS (Mavi) -->
                         <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#4EA8DE" stroke-width="5" 
                                 stroke-dasharray="{sms_oran} {100 - sms_oran}" stroke-dashoffset="-{p1}"></circle>
-                        <!-- Dilim 3: KS (Sarı) -->
                         <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#FFB703" stroke-width="5" 
                                 stroke-dasharray="{ks_oran} {100 - ks_oran}" stroke-dashoffset="-{p2}"></circle>
-                        <!-- Dilim 4: KS-PE (Yeşil) -->
                         <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#4CAF50" stroke-width="5" 
                                 stroke-dasharray="{kspe_oran} {100 - kspe_oran}" stroke-dashoffset="-{p3}"></circle>
                     </svg>
