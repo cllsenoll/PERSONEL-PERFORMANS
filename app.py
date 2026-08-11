@@ -25,7 +25,7 @@ KULLANICI_ISIM = "Celal ŞENOL"
 KULLANICI_GOREV = "Şube Şefi"
 
 # ==========================================
-# CSS VE TRANSLATE KORUMA KODLARI
+# CSS VE MODERN GÖRSEL BİLEŞEN TASARIMLARI
 # ==========================================
 custom_css = """
 <style>
@@ -131,26 +131,54 @@ custom_css = """
         color: #FFB703 !important;
     }
     
-    /* Örnek Tarzı Modern Dashboard Kartları */
+    /* Örnek Tasarıma Benzer Modern Dashboard Kartları */
     .dashboard-card {
         background: linear-gradient(135deg, #162A45 0%, #0B192C 100%);
-        border: 1px solid rgba(255, 183, 3, 0.25);
+        border: 1px solid rgba(255, 183, 3, 0.3);
         border-radius: 16px;
         padding: 24px;
-        margin-bottom: 20px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        margin-bottom: 25px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
-    .stat-box-title {
-        font-size: 12px;
-        color: rgba(255,255,255,0.5);
+    .stat-label {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.5);
         text-transform: uppercase;
         letter-spacing: 1px;
+        margin-bottom: 4px;
     }
-    .stat-box-val {
-        font-size: 26px;
+    .stat-number {
+        font-size: 28px;
         font-weight: 800;
         color: #FFB703;
-        margin-bottom: 15px;
+        margin-bottom: 18px;
+    }
+    
+    /* Özel Modern İlerleme Çubukları */
+    .progress-container {
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 8px;
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .progress-bar-bg {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        height: 10px;
+        width: 100%;
+        margin-top: 6px;
+        overflow: hidden;
+    }
+    .progress-bar-fill-blue {
+        background: linear-gradient(90deg, #0077B6 0%, #00B4D8 100%);
+        height: 100%;
+        border-radius: 6px;
+    }
+    .progress-bar-fill-orange {
+        background: linear-gradient(90deg, #FB8500 0%, #FFB703 100%);
+        height: 100%;
+        border-radius: 6px;
     }
 </style>
 """
@@ -433,46 +461,95 @@ if st.session_state.active_tab == "Ana Panel":
         
         st.markdown("---")
         
-        # 1. KART: Kurye Başarı Oranları (Örnek Görseldeki Sol-Sağ Dağılımlı Tasarım)
+        # ----------------------------------------------------
+        # 1. KART: Kurye Başarı Oranları (Örnek Görsel Tarzında)
+        # ----------------------------------------------------
         st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
-        st.markdown("<h3 style='color: #FFB703 !important; margin-bottom: 15px;'>📊 Kurye Başarı Oranları (%)</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #FFB703 !important; margin-bottom: 20px;'>📊 Kurye Başarı Oranları (%)</h3>", unsafe_allow_html=True)
         
-        col_sol, col_sag = st.columns([1, 2])
-        with col_sol:
+        c_sol, c_sag = st.columns([1, 2])
+        with c_sol:
+            max_p = perf_df.loc[perf_df['Başarı Oranı'].idxmax()] if not perf_df.empty else None
+            max_name = max_p['Personel'] if max_p is not None else "-"
+            max_val = max_p['Başarı Oranı'] if max_p is not None else 0
+            
             st.markdown(f"""
-                <div style="padding-top: 15px;">
-                    <div class="stat-box-title">En Başarılı Oran</div>
-                    <div class="stat-box-val">%{perf_df['Başarı Oranı'].max() if not perf_df.empty else 0}</div>
-                    <div class="stat-box-title">Aktif Kurye Sayısı</div>
-                    <div class="stat-box-val" style="color: #00B4D8;">{len(perf_df)} Kişi</div>
+                <div style="padding: 10px 0;">
+                    <div class="stat-label">En Başarılı Kurye</div>
+                    <div style="font-size: 16px; font-weight: bold; color: #FFFFFF; margin-bottom: 4px;">{max_name}</div>
+                    <div class="stat-number">%{max_val}</div>
+                    <div class="stat-label">Toplam Aktif Kurye</div>
+                    <div style="font-size: 20px; font-weight: 700; color: #00B4D8;">{len(perf_df)} Kişi</div>
                 </div>
             """, unsafe_allow_html=True)
-        with col_sag:
-            chart_df = perf_df.set_index("Personel")[["Başarı Oranı"]]
-            st.bar_chart(chart_df)
+            
+        with c_sag:
+            # Görseldeki modern çubuk yapısını simüle eden özel şık HTML barlar
+            bars_html = ""
+            for _, r in perf_df.iterrows():
+                p_adi = r["Personel"]
+                p_oran = r["Başarı Oranı"]
+                bars_html += f"""
+                <div class="progress-container">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600;">
+                        <span>{p_adi}</span>
+                        <span style="color: #FFB703;">%{p_oran}</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill-orange" style="width: {min(p_oran, 100)}%;"></div>
+                    </div>
+                </div>
+                """
+            st.markdown(bars_html, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
         
-        # 2. KART: Teslimat Kanalları Dağılımı (Örnek Görseldeki Halka Grafik & Çoklu Çubuk Tarzı)
+        # ----------------------------------------------------
+        # 2. KART: Teslimat Kanalları Dağılımı (Örnek Görsel Tarzında)
+        # ----------------------------------------------------
         st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
-        st.markdown("<h3 style='color: #FFB703 !important; margin-bottom: 15px;'>📲 Teslimat Kanalları Dağılımı</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color: #FFB703 !important; margin-bottom: 20px;'>📲 Teslimat Kanalları Dağılımı</h3>", unsafe_allow_html=True)
         
-        col_chan_sol, col_chan_sag = st.columns([1, 2])
-        total_teslim_adet = perf_df["İMZA"].sum() + perf_df["SMS"].sum() + perf_df["KS"].sum() + perf_df["KS-PE"].sum()
-        with col_chan_sol:
+        chan_sol, chan_sag = st.columns([1, 2])
+        imza_t = perf_df["İMZA"].sum()
+        sms_t = perf_df["SMS"].sum()
+        ks_t = perf_df["KS"].sum()
+        kspe_t = perf_df["KS-PE"].sum()
+        toplam_kanal = imza_t + sms_t + ks_t + kspe_t
+        
+        imza_oran = round((imza_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0
+        sms_oran = round((sms_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0
+        
+        with chan_sol:
             st.markdown(f"""
-                <div style="padding-top: 15px;">
-                    <div class="stat-box-title">Toplam İşlem Adedi</div>
-                    <div class="stat-box-val" style="color: #4CAF50;">{total_teslim_adet:,}</div>
-                    <div class="stat-box-title">En Çok Kullanılan Kanal</div>
-                    <div class="stat-box-val" style="color: #00B4D8;">İMZA / SMS</div>
+                <div style="padding: 10px 0;">
+                    <div class="stat-label">Toplam İşlem Hacmi</div>
+                    <div class="stat-number" style="color: #4CAF50;">{toplam_kanal:,} Adet</div>
+                    <div class="stat-label">En Çok Tercih Edilen</div>
+                    <div style="font-size: 16px; font-weight: bold; color: #00B4D8;">İMZA (%{imza_oran})</div>
                 </div>
             """, unsafe_allow_html=True)
-        with col_chan_sag:
-            channel_df = pd.DataFrame({
-                "Kanal": ["İMZA", "SMS", "KS", "KS-PE"],
-                "Adet": [perf_df["İMZA"].sum(), perf_df["SMS"].sum(), perf_df["KS"].sum(), perf_df["KS-PE"].sum()]
-            }).set_index("Kanal")
-            st.bar_chart(channel_df)
+            
+        with chan_sag:
+            channels = [
+                ("İMZA", imza_t, imza_oran),
+                ("SMS", sms_t, sms_oran),
+                ("KS (Kapıya Bırakıldı)", ks_t, round((ks_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0),
+                ("KS-PE (Pos Entegrasyon)", kspe_t, round((kspe_t / toplam_kanal) * 100, 1) if toplam_kanal > 0 else 0)
+            ]
+            chan_bars_html = ""
+            for kanal_adi, adet, oran in channels:
+                chan_bars_html += f"""
+                <div class="progress-container">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600;">
+                        <span>{kanal_adi}</span>
+                        <span style="color: #00B4D8;">{adet} Adet (%{oran})</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill-blue" style="width: {min(oran, 100)}%;"></div>
+                    </div>
+                </div>
+                """
+            st.markdown(chan_bars_html, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
             
         st.subheader("📋 Genel Performans Tablosu")
