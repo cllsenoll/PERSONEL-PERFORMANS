@@ -25,7 +25,7 @@ KULLANICI_ISIM = "Celal ŞENOL"
 KULLANICI_GOREV = "Şube Şefi"
 
 # ==========================================
-# CSS VE TRANSLATE KORUMA KODLARI
+# CSS VE TRANSLATE KORUMA KODLARI (GÜÇLENDİRİLMİŞ TEMA)
 # ==========================================
 custom_css = """
 <style>
@@ -33,15 +33,15 @@ custom_css = """
         translate: no !important;
     }
     .stApp {
-        background-color: #070E1E;
-        color: #FFFFFF;
+        background-color: #0B192C !important;
+        color: #FFFFFF !important;
     }
     h1, h2, h3, h4, h5, h6, p, span, label {
         color: #FFFFFF !important;
         font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
     [data-testid="stSidebar"] {
-        background-color: #0B172E !important;
+        background-color: #1E3E62 !important;
         border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
     [data-testid="stSidebar"] div.stButton > button {
@@ -49,20 +49,39 @@ custom_css = """
         height: 48px !important;
         border-radius: 10px !important;
         font-weight: 600 !important;
-        background: linear-gradient(135deg, #0A58CA 0%, #032057 100%) !important;
+        background: linear-gradient(135deg, #00B4D8 0%, #0077B6 100%) !important;
         color: #FFFFFF !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        margin-bottom: 6px !important;
+        border: 1px solid #90E0EF !important;
+        box-shadow: 0 6px 0 #03045E, 0 8px 10px rgba(0, 0, 0, 0.4) !important;
+        margin-bottom: 10px !important;
         text-align: left !important;
         padding-left: 15px !important;
     }
     [data-testid="stSidebar"] div.stButton > button:hover {
-        background: linear-gradient(135deg, #0D6EFD 0%, #0A58CA 100%) !important;
-        border-color: #F57C00 !important;
+        background: linear-gradient(135deg, #48CAE4 0%, #00B4D8 100%) !important;
     }
+    
+    /* "AT Zimmet Raporu Yükle" Alanı Sarı Tasarım */
+    [data-testid="stFileUploader"] section {
+        background: linear-gradient(135deg, #FFD166 0%, #FFB703) !important;
+        border: 2px dashed #FB8500 !important;
+        border-radius: 12px !important;
+    }
+    [data-testid="stFileUploader"] section * {
+        color: #000000 !important;
+    }
+    [data-testid="stFileUploader"] button {
+        background: linear-gradient(135deg, #FFB703 0%, #FB8500) !important;
+        color: #FFFFFF !important;
+        border: 1px solid #FFFFFF !important;
+        font-weight: bold !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 0 #9E2A2B, 0 6px 8px rgba(0,0,0,0.3) !important;
+    }
+
     .person-card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 14px;
         padding: 16px 20px;
         margin-bottom: 14px;
@@ -77,9 +96,9 @@ custom_css = """
         width: 62px;
         height: 62px;
         border-radius: 50%;
-        border: 2px solid #F57C00;
+        border: 2px solid #FFB703;
         object-fit: cover;
-        background-color: #0B172E;
+        background-color: #1E3E62;
     }
     .person-name {
         font-size: 15px;
@@ -88,7 +107,7 @@ custom_css = """
     }
     .metric-title {
         font-size: 11px;
-        color: rgba(255, 255, 255, 0.5) !important;
+        color: rgba(255, 255, 255, 0.6) !important;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         margin-bottom: 2px;
@@ -98,8 +117,8 @@ custom_css = """
         font-weight: 700;
     }
     .channel-badge {
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 6px;
         padding: 4px 10px;
         font-size: 12px;
@@ -109,7 +128,7 @@ custom_css = """
     }
     .badge-val {
         font-weight: 700;
-        color: #F57C00 !important;
+        color: #FFB703 !important;
     }
 </style>
 """
@@ -178,7 +197,7 @@ def get_courier_photo(courier_name):
         except Exception:
             continue
                 
-    return f"https://ui-avatars.com/api/?name={courier_name.replace(' ', '+')}&background=0B172E&color=F57C00&bold=true&size=80"
+    return f"https://ui-avatars.com/api/?name={courier_name.replace(' ', '+')}&background=1E3E62&color=FFB703&bold=true&size=80"
 
 # ==========================================
 # AKILLI DOSYA OKUMA MOTORU
@@ -241,7 +260,6 @@ def process_excel_data(df):
     has_aciklama = "Açıklama" in df.columns
     has_kanali = "Kargo Teslimat Kanalı" in df.columns
 
-    # 1. Kural: Yalnızca AT Zimmet Personel Adı sütununda adı geçen geçerli personeller
     valid_df = df[
         df["Norm_Zimmet"].notna() & 
         (df["Norm_Zimmet"] != "") & 
@@ -250,7 +268,6 @@ def process_excel_data(df):
     ].copy()
 
     def evaluate_row(row):
-        # Durum kontrolü (Bekletiliyor / Edilmedi vb.)
         if durum_col:
             d_val = str(row[durum_col]).strip().upper()
             if "BEKLETİLİYOR" in d_val or "EDİLMEDİ" in d_val or "BEKLETILIYOR" in d_val or "EDILMEDI" in d_val:
@@ -259,11 +276,9 @@ def process_excel_data(df):
         z = row["Norm_Zimmet"]
         t = row["Norm_Teslim"]
         
-        # 4. Kural: Teslim Eden Personel boşsa ya da farklıysa devirdir.
         if t == "" or t == "NAN" or t == "NONE" or t != z:
             return "DEVİR"
         
-        # 3. & 5. Kural: Zimmet ve Teslim Eden aynı ise kanal tespiti
         kanali = str(row["Kargo Teslimat Kanalı"]).strip().upper() if has_kanali else ""
         aciklama = str(row["Açıklama"]).strip().upper() if has_aciklama else ""
 
@@ -276,7 +291,6 @@ def process_excel_data(df):
         elif (kanali == "" or kanali == "NAN" or kanali == "-") and "POS ENTEGRASYON" in aciklama:
             return "KS-PE"
         
-        # Açıklamada geçiyorsa
         if "İMZA" in aciklama or "IMZA" in aciklama:
             return "İMZA"
         elif "SMS" in aciklama:
@@ -295,21 +309,16 @@ def process_excel_data(df):
         p_name = p_df["AT Zimmet Personel Adı"].mode()[0] if not p_df["AT Zimmet Personel Adı"].mode().empty else norm_p
         p_name = " ".join(str(p_name).split())
         
-        # 2. Kural: Toplam Zimmet = Satır sayısı
         zimmet_cnt = len(p_df)
-        
-        # 4. Kural: Devir (Teslim Edilemeyen) sayısı
         devir_df = p_df[p_df["Islem_Sonucu"] == "DEVİR"]
         teslim_edilemeyen_cnt = len(devir_df)
         
-        # 3. Kural: Teslim Edilen sayısı (Zimmet - Devir)
         teslim_cnt = zimmet_cnt - teslim_edilemeyen_cnt
         if teslim_cnt < 0:
             teslim_cnt = 0
         
         success_rate = round((teslim_cnt / zimmet_cnt) * 100, 1) if zimmet_cnt > 0 else 0.0
         
-        # 5. Kural: Kanal Bazlı Dağılımlar (Yalnızca teslim edilenler üzerinden)
         teslim_edilen_df = p_df[p_df["Islem_Sonucu"] != "DEVİR"]
         imza_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "İMZA"])
         sms_cnt = len(teslim_edilen_df[teslim_edilen_df["Islem_Sonucu"] == "SMS"])
@@ -341,7 +350,7 @@ with st.sidebar:
     st.markdown("""
     <div class="notranslate" style="text-align: center; padding-bottom: 10px;">
         <h2 style="margin: 0; color: #FFFFFF;">Yurtiçi Kargo</h2>
-        <h4 style="margin: 0; color: #F57C00;">Görükle Acente KOYS</h4>
+        <h4 style="margin: 0; color: #00B4D8;">Görükle Acente KOYS</h4>
     </div>
     """, unsafe_allow_html=True)
     
@@ -349,7 +358,7 @@ with st.sidebar:
     
     st.markdown(f"""
     <div class="notranslate" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
-        <small style="color: #F57C00;">Aktif Kullanıcı:</small><br>
+        <small style="color: #FFB703;">Aktif Kullanıcı:</small><br>
         <strong>{KULLANICI_ISIM}</strong> ({KULLANICI_GOREV})
     </div>
     """, unsafe_allow_html=True)
@@ -459,7 +468,7 @@ elif st.session_state.active_tab == "Kurye Performans":
                         <img src="{avatar_url}" class="avatar-circle">
                         <div>
                             <div class="person-name">{p_name}</div>
-                            <small style="color: #F57C00;">Saha Kuryesi</small>
+                            <small style="color: #FFB703;">Saha Kuryesi</small>
                         </div>
                     </div>
                     <div style="text-align: center;">
@@ -476,7 +485,7 @@ elif st.session_state.active_tab == "Kurye Performans":
                     </div>
                     <div style="text-align: center; min-width: 80px;">
                         <div class="metric-title">Başarı Oranı</div>
-                        <div class="metric-value" style="color: #F57C00;">%{rate}</div>
+                        <div class="metric-value" style="color: #FFB703;">%{rate}</div>
                     </div>
                 </div>
                 <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06);">
