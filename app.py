@@ -257,7 +257,7 @@ def get_courier_photo(courier_name):
         except Exception:
             continue
 
-    return f"https://ui-avatars.com/api/?name={courier_name.replace(' ', '+')}&background=1E3E62&color=FFB703&bold=true&size=120"
+    return f"https://ui-avatars.com/api/?name={courier_name.replace(' ', '+')}&background=1E3E62&color=FFB703&bold=true&size=150"
 
 
 # ==========================================
@@ -517,11 +517,11 @@ if st.session_state.active_tab == "Ana Panel":
                 f"""
                 <div style="padding: 5px 0;" class="notranslate">
                     <div class="stat-label">En Başarılı Kurye</div>
-                    <div style="display: flex; align-items: center; gap: 16px; margin-top: 10px; margin-bottom: 15px;">
-                        <img src="{max_avatar_url}" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid #FFB703; object-fit: cover; background-color: #1E3E62;">
+                    <div style="display: flex; align-items: center; gap: 20px; margin-top: 12px; margin-bottom: 18px;">
+                        <img src="{max_avatar_url}" style="width: 110px; height: 110px; border-radius: 50%; border: 4px solid #FFB703; object-fit: cover; background-color: #1E3E62;">
                         <div>
-                            <div style="font-size: 19px; font-weight: bold; color: #FFFFFF; line-height: 1.3;">{max_name}</div>
-                            <div style="font-size: 30px; font-weight: 800; color: #FFB703; margin-top: 4px;">%{max_val}</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #FFFFFF; line-height: 1.3;">{max_name}</div>
+                            <div style="font-size: 38px; font-weight: 800; color: #FFB703; margin-top: 6px;">%{max_val}</div>
                         </div>
                     </div>
                     <div class="stat-label" style="margin-top: 15px;">Toplam Aktif Kurye</div>
