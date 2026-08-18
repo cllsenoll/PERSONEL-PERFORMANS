@@ -257,7 +257,7 @@ def get_courier_photo(courier_name):
         except Exception:
             continue
 
-    return f"https://ui-avatars.com/api/?name={courier_name.replace(' ', '+')}&background=1E3E62&color=FFB703&bold=true&size=80"
+    return f"https://ui-avatars.com/api/?name={courier_name.replace(' ', '+')}&background=1E3E62&color=FFB703&bold=true&size=120"
 
 
 # ==========================================
@@ -493,7 +493,7 @@ if st.session_state.active_tab == "Ana Panel":
         st.markdown("---")
 
         # ----------------------------------------------------
-        # 1. KART: Kurye Başarı Oranları (Fotoğraflı En Başarılı Kurye Güncellemesi)
+        # 1. KART: Kurye Başarı Oranları (Fotoğraf ve Değerler Daha Büyük)
         # ----------------------------------------------------
         st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
         st.markdown(
@@ -511,18 +511,17 @@ if st.session_state.active_tab == "Ana Panel":
             max_name = max_p["Personel"] if max_p is not None else "-"
             max_val = max_p["Başarı Oranı"] if max_p is not None else 0
             
-            # En başarılı kurye için fotoğraf çekme fonksiyonu entegrasyonu
             max_avatar_url = get_courier_photo(max_name) if max_p is not None else ""
 
             st.markdown(
                 f"""
                 <div style="padding: 5px 0;" class="notranslate">
                     <div class="stat-label">En Başarılı Kurye</div>
-                    <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px; margin-bottom: 12px;">
-                        <img src="{max_avatar_url}" style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid #FFB703; object-fit: cover; background-color: #1E3E62;">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-top: 10px; margin-bottom: 15px;">
+                        <img src="{max_avatar_url}" style="width: 85px; height: 85px; border-radius: 50%; border: 3px solid #FFB703; object-fit: cover; background-color: #1E3E62;">
                         <div>
-                            <div style="font-size: 15px; font-weight: bold; color: #FFFFFF; line-height: 1.2;">{max_name}</div>
-                            <div style="font-size: 22px; font-weight: 800; color: #FFB703; margin-top: 2px;">%{max_val}</div>
+                            <div style="font-size: 19px; font-weight: bold; color: #FFFFFF; line-height: 1.3;">{max_name}</div>
+                            <div style="font-size: 30px; font-weight: 800; color: #FFB703; margin-top: 4px;">%{max_val}</div>
                         </div>
                     </div>
                     <div class="stat-label" style="margin-top: 15px;">Toplam Aktif Kurye</div>
